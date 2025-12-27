@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDR | CFO Fractional & Planificación Financiera</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                navy: '#0B1F3B',    // Primary Brand
+                blue: '#123B7A',    // Secondary Blue
+                light: '#F0F6FF',   // Lighter Blue Background
+                gold: '#FFC83D',    // UPDATED: Brighter Gold
+                goldHover: '#FFD660', // UPDATED: Brighter Hover
+                gray: '#2B2F36',    // Text Gray
+                graySec: '#5B6472', // Secondary Text
+                border: '#E2E6ED',  // Border Gray
+                white: '#FFFFFF',   // Base White
+                alt: '#F8FAFC',     // Alternate Background
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            boxShadow: {
+              'premium': '0 10px 40px -10px rgba(11, 31, 59, 0.08)',
+              'premium-hover': '0 20px 50px -10px rgba(11, 31, 59, 0.12)',
+              'gold': '0 4px 14px -2px rgba(255, 200, 61, 0.4)', // Updated shadow color
+              'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+            },
+            backgroundImage: {
+              'hero-pattern': "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFC83D' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+              'dot-pattern': "url(\"data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23123B7A' fill-opacity='0.08'/%3E%3C/svg%3E\")",
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background-color: #F8FAFC; }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f1f1; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      
+      /* Custom Animations for About Section */
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-20px) scale(1.05); }
+      }
+      
+      @keyframes wave {
+        0%, 100% { transform: translateX(0) translateY(0); }
+        50% { transform: translateX(-25px) translateY(-10px); }
+      }
+      
+      /* Animation delay utilities */
+      .animation-delay-2000 { animation-delay: 2s; }
+      .animation-delay-4000 { animation-delay: 4s; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "framer-motion": "https://esm.sh/framer-motion@10.16.4?external=react,react-dom",
+    "lucide-react": "https://esm.sh/lucide-react@0.294.0?external=react",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
