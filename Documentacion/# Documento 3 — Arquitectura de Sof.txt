@@ -1,0 +1,325 @@
+# Documento 3 — Arquitectura de Software (CRÍTICO)
+Proyecto: Landing + Blog/Insights + Mini-test + Admin (CDR)  
+Stack objetivo: **React + TypeScript** en **Vercel**, persistencia/auth con **Supabase**
+
+## 1. Decisiones Arquitectónicas (High-Level)
+### 1.1 Estilo y enfoque
+- **Arquitectura:** Clean Architecture adaptada a Web (Frontend + Backend-for-Frontend).
+- **Patrón de aplicación:** **BFF con Next.js** (recomendado en Vercel) para:
+  - SSR/SSG para SEO (landing + blog).
+  - Endpoints server-side (Route Handlers) para operaciones sensibles/admin.
+  - Integración limpia con Supabase Auth (sesiones/cookies).
+- **Separación estricta por capas:**
+  - `domain` (reglas/entidades/puertos)
+  - `application` (casos de uso)
+  - `infrastructure` (Supabase, analytics, sanitización, repositorios)
+  - `presentation` (UI, páginas, componentes)
+
+> Nota: Aunque el usuario dijo “React + TS”, en Vercel el camino enterprise para SEO + blog suele ser **Next.js** (sigue siendo React + TS).
+
+---
+
+## 2. Stack Tecnológico (propuesto)
+| Área | Tecnología | Motivo |
+|---|---|---|
+| Framework | **Next.js (App Router) + React + TypeScript** | SSR/SSG, SEO, routing, BFF en Vercel |
+| UI | Tailwind CSS + componentes propios | Velocidad, consistencia |
+| Datos / Auth | Supabase (Postgres + Auth + RLS) | Admin simple, CRUD posts, escalable |
+| Fetch / Cache | TanStack Query (React Query) | Cache, loading/error states, DX |
+| Editor contenido | Markdown (textarea + preview) o editor rich (opcional) | Simple para Antonio; versionable |
+| Render Markdown | remark/rehype + sanitización | Seguridad XSS en posts |
+| Analytics | GA4 (o alternativa ligera) | Medición CTAs/test/shares |
+| Deploy | Vercel | CI/CD, performance edge |
+
+---
+
+## 3. Componentes del Sistema
+### 3.1 Módulos principales
+- **Sitio público**
+  - Landing (SSR/SSG)
+  - Blog: listado + detalle (SSG/ISR ideal)
+  - Mini-test: cálculo client-side + CTA Calendly
+- **Admin**
+  - Login
+  - CRUD posts (draft/published)
+  - Campos SEO por post
+- **BFF (Route Handlers)**
+  - Endpoints para operaciones admin (crear/editar/publicar/borrar)
+  - Validación de sesión/rol (Admin)
+  - Interfaz con repositorios (Supabase)
+- **Supabase**
+  - Auth: 1 usuario admin
+  - DB: posts, tags, categories (opcional)
+  - Storage: imágenes destacadas (opcional)
+
+---
+
+## 4. Arquitectura por Capas (Clean Architecture)
+### 4.1 Domain Layer (`/src/domain`)
+**Contiene:**
+- Entidades: `Post`, `PostStatus`, `TestResult`
+- Value Objects: `Slug`, `SeoMeta`
+- Puertos (interfaces): `PostRepository`, `AuthService`, `AnalyticsTracker`
+
+**No depende de:** Next.js, Supabase, librerías UI.
+
+### 4.2 Application Layer (`/src/application`)
+**Contiene Casos de Uso:**
+- `ListPublishedPosts`
+- `GetPublishedPostBySlug`
+- `CreatePost`
+- `UpdatePost`
+- `PublishPost`
+- `UnpublishPost`
+- `DeletePost`
+- `LoginAdmin` (si aplica)
+- `ComputeHealthTestResult` (si decidimos server-side; por defecto client-side)
+
+**Depende de:** `domain` (interfaces + entidades)
+
+### 4.3 Infrastructure Layer (`/src/infrastructure`)
+**Implementa puertos** con tecnologías concretas:
+- `SupabasePostRepository`
+- `SupabaseAuthService`
+- `MarkdownRenderer` + sanitización
+- `GoogleAnalyticsTracker`
+
+### 4.4 Presentation Layer (`/src/presentation` + `/src/app`)
+**Contiene:**
+- Páginas/rutas Next (`/app`)
+- Componentes UI
+- Hooks de UI (que llaman casos de uso vía adaptadores)
+- Formularios (Admin, Test)
+
+---
+
+## 5. Árbol de Directorios (Estructura exacta)
+```txt
+/
+├─ src/
+│  ├─ app/                                  # Next.js App Router
+│  │  ├─ (public)/
+│  │  │  ├─ page.tsx                        # Landing
+│  │  │  ├─ blog/
+│  │  │  │  ├─ page.tsx                     # Listado blog
+│  │  │  │  └─ [slug]/
+│  │  │  │     └─ page.tsx                  # Detalle post
+│  │  │  └─ test-salud/
+│  │  │     └─ page.tsx                     # Mini-test (opcional route dedicada)
+│  │  ├─ (admin)/
+│  │  │  ├─ admin/
+│  │  │  │  ├─ login/
+│  │  │  │  │  └─ page.tsx                  # Login
+│  │  │  │  ├─ posts/
+│  │  │  │  │  ├─ page.tsx                  # Listado admin
+│  │  │  │  │  ├─ new/
+│  │  │  │  │  │  └─ page.tsx               # Crear post
+│  │  │  │  │  └─ [id]/
+│  │  │  │  │     └─ page.tsx               # Editar post
+│  │  │  │  └─ layout.tsx                   # Layout admin
+│  │  ├─ api/                               # BFF (Route Handlers)
+│  │  │  ├─ admin/
+│  │  │  │  ├─ posts/
+│  │  │  │  │  ├─ route.ts                  # POST (create), GET (list admin)
+│  │  │  │  │  └─ [id]/
+│  │  │  │  │     └─ route.ts               # PUT/PATCH/DELETE
+│  │  │  └─ public/
+│  │  │     └─ posts/
+│  │  │        └─ [slug]/
+│  │  │           └─ route.ts               # GET post publicado (si no se usa fetch directo)
+│  │  ├─ layout.tsx
+│  │  ├─ globals.css
+│  │  └─ sitemap.ts                         # Sitemap dinámico
+│  ├─ domain/
+│  │  ├─ entities/
+│  │  │  ├─ Post.ts
+│  │  │  └─ TestResult.ts
+│  │  ├─ value-objects/
+│  │  │  ├─ Slug.ts
+│  │  │  └─ SeoMeta.ts
+│  │  └─ ports/
+│  │     ├─ PostRepository.ts
+│  │     ├─ AuthService.ts
+│  │     └─ AnalyticsTracker.ts
+│  ├─ application/
+│  │  ├─ use-cases/
+│  │  │  ├─ posts/
+│  │  │  │  ├─ ListPublishedPosts.ts
+│  │  │  │  ├─ GetPublishedPostBySlug.ts
+│  │  │  │  ├─ CreatePost.ts
+│  │  │  │  ├─ UpdatePost.ts
+│  │  │  │  ├─ PublishPost.ts
+│  │  │  │  ├─ UnpublishPost.ts
+│  │  │  │  └─ DeletePost.ts
+│  │  │  └─ test/
+│  │  │     └─ ComputeHealthTestResult.ts   # opcional si se quiere encapsular
+│  │  └─ dto/
+│  │     ├─ PostDTO.ts
+│  │     ├─ PostInput.ts
+│  │     └─ TestInput.ts
+│  ├─ infrastructure/
+│  │  ├─ supabase/
+│  │  │  ├─ client.ts                       # supabase browser client (anon)
+│  │  │  ├─ server.ts                       # supabase server client (cookies/session)
+│  │  │  ├─ SupabasePostRepository.ts
+│  │  │  └─ SupabaseAuthService.ts
+│  │  ├─ markdown/
+│  │  │  ├─ renderMarkdown.ts               # remark/rehype pipeline
+│  │  │  └─ sanitizeHtml.ts                 # sanitización XSS
+│  │  └─ analytics/
+│  │     └─ GoogleAnalyticsTracker.ts
+│  ├─ presentation/
+│  │  ├─ components/
+│  │  │  ├─ layout/
+│  │  │  ├─ ui/
+│  │  │  ├─ blog/
+│  │  │  └─ test/
+│  │  ├─ hooks/
+│  │  │  ├─ usePosts.ts
+│  │  │  └─ useAdminPosts.ts
+│  │  ├─ services/
+│  │  │  ├─ postService.ts                  # adaptador UI -> casos de uso
+│  │  │  └─ analyticsService.ts
+│  │  └─ styles/
+│  ├─ shared/
+│  │  ├─ config/
+│  │  │  ├─ env.ts                          # validación env vars
+│  │  │  └─ routes.ts
+│  │  ├─ constants/
+│  │  └─ utils/
+│  └─ middleware.ts                         # protección rutas admin (Next)
+├─ supabase/
+│  ├─ migrations/
+│  └─ seed.sql
+├─ .env.example
+├─ package.json
+└─ README.md
+
+6. Patrones de Diseño obligatorios
+Patrón	Dónde aplica	Regla
+Repository	Acceso a datos posts	UI y casos de uso NUNCA hablan con Supabase directo
+Use Case / Interactor	application/use-cases/*	Cada operación de negocio = 1 caso de uso
+DTO + Mapper	application/dto + mappers	Nunca exponer entidades dominio en API/UI sin mapear
+Dependency Inversion	Domain define interfaces	Infra implementa, App inyecta
+Policy-based auth (simple)	middleware + server client	Admin-only en rutas /admin y /api/admin/*
+7. Estrategia de Render (SEO + Performance)
+7.1 Landing
+
+Render: SSR o SSG (preferible SSG si contenido estable).
+
+CTA: Calendly embed/redirect.
+
+7.2 Blog
+
+Render: SSG + ISR (Incremental Static Regeneration) para performance + SEO.
+
+Revalidación: cada publicación/despublicación dispara revalidate (o TTL corto).
+
+7.3 Admin
+
+Render: SSR/CSR privado, protegido por middleware y sesión.
+
+8. Seguridad (mínimo enterprise)
+8.1 OWASP Web Essentials
+
+Sanitización estricta del HTML generado desde Markdown (prevención XSS).
+
+CSP (Content Security Policy) compatible con Calendly/GA.
+
+Protección rutas admin:
+
+middleware.ts valida sesión supabase
+
+/api/admin/* verifica rol/claim
+
+Supabase:
+
+RLS habilitado
+
+Tabla posts: escritura solo para admin autenticado
+
+Secrets:
+
+SUPABASE_ANON_KEY solo para público (con RLS)
+
+service role key solo si fuera imprescindible (idealmente NO)
+
+8.2 Autenticación Admin
+
+Supabase Auth (email+password o magic link).
+
+Recomendación: magic link para reducir fricción y riesgos de password reuse.
+
+9. Integraciones
+9.1 Calendly
+
+Modal embebido o redirect (decisión UX).
+
+UTM passthrough:
+
+Preservar utm_* en links desde blog y landing.
+
+9.2 Share LinkedIn / WhatsApp
+
+LinkedIn: share por URL (abre diálogo).
+
+WhatsApp: link wa.me con texto y URL prellenados.
+
+OG tags por post obligatorios para preview correcto.
+
+9.3 Analytics
+
+Eventos mínimos:
+
+cta_calendly_click (con ubicación)
+
+test_started, test_completed, test_cta_calendly_click
+
+share_linkedin, share_whatsapp
+
+10. Cálculo del Mini-test (arquitectura)
+10.1 Enfoque recomendado (MVP)
+
+Cálculo client-side (rápido, simple) con función pura ComputeHealthTestResult.
+
+No persistir inputs (evitar sensibilidad). Solo enviar evento con “categoría de resultado”.
+
+10.2 Modelo de resultado (propuesto)
+
+Categorías:
+
+CRITICA, EN_RIESGO, ESTABLE
+
+Mensaje dinámico:
+
+“Tenés que coordinar una reunión ya antes de que [riesgo]…”
+
+CTA inmediato a Calendly.
+
+11. Entornos y Variables (base)
+
+Archivo .env.example:
+
+NEXT_PUBLIC_SUPABASE_URL=
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+NEXT_PUBLIC_CALENDLY_URL=
+
+NEXT_PUBLIC_GA_ID= (si aplica)
+
+ADMIN_EMAIL_ALLOWLIST= (opcional, para reforzar)
+
+12. Definition of Done (Arquitectura)
+
+Se considera “arquitectura correcta” si:
+
+El árbol de directorios se respeta.
+
+UI no accede directo a Supabase: siempre via repositorios/casos de uso.
+
+Admin protegido por middleware + verificación server-side.
+
+Blog renderiza seguro (sanitización XSS) y con OG tags.
+
+Deploy en Vercel con env vars y build estable.

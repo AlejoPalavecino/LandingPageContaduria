@@ -1,0 +1,323 @@
+# Documento 6 — Contrato de API y DTOs (BFF + Supabase)
+Proyecto: Landing + Blog/Insights + Mini-test + Admin (CDR)  
+Framework recomendado: Next.js (App Router) con Route Handlers `/app/api/*`
+
+## 1. Principios del Contrato
+- **BFF (Backend-for-Frontend):** el frontend NO habla directo con Supabase para operaciones admin (CRUD), sino vía API interna.
+- **Lecturas públicas (blog):** pueden hacerse:
+  - (A) directo desde Supabase con RLS + anon key, o
+  - (B) vía BFF para centralizar cache/ISR.
+  
+✅ Recomendación:  
+- **Admin:** siempre via BFF.  
+- **Público:** preferir **BFF** para “get post by slug” y “list posts” (mejor control SEO/caché, sin exponer estructura).
+
+- **Auth:** Supabase Auth; endpoints admin requieren sesión válida.
+- **Errores:** JSON consistente con `error.code` y `error.message`.
+
+---
+
+## 2. Versionado y Base URL
+- Base: `/api`
+- Versionado: opcional (no requerido en MVP). Si se quiere: `/api/v1/*`
+
+---
+
+## 3. DTOs (Data Transfer Objects)
+
+## 3.1 `PostDTO`
+Representación pública/admin del post (salida).
+
+```json
+{
+  "id": "uuid",
+  "title": "string",
+  "slug": "string",
+  "excerpt": "string|null",
+  "contentMd": "string",
+  "status": "draft|published",
+  "publishedAt": "2025-12-26T12:00:00Z|null",
+  "coverImageUrl": "string|null",
+  "seo": {
+    "title": "string|null",
+    "description": "string|null",
+    "ogImageUrl": "string|null",
+    "canonicalUrl": "string|null"
+  },
+  "tags": [
+    { "id": "uuid", "name": "string", "slug": "string" }
+  ],
+  "category": { "id": "uuid", "name": "string", "slug": "string" } ,
+  "createdAt": "2025-12-26T12:00:00Z",
+  "updatedAt": "2025-12-26T12:00:00Z"
+}
+
+
+Nota: category puede omitirse si no se implementa categorías en MVP.
+
+3.2 PostListItemDTO
+
+Para listado (más liviano).
+
+{
+  "id": "uuid",
+  "title": "string",
+  "slug": "string",
+  "excerpt": "string|null",
+  "publishedAt": "2025-12-26T12:00:00Z|null",
+  "coverImageUrl": "string|null",
+  "tags": [
+    { "id": "uuid", "name": "string", "slug": "string" }
+  ]
+}
+
+3.3 PostCreateInput
+{
+  "title": "string",
+  "slug": "string|null",
+  "excerpt": "string|null",
+  "contentMd": "string",
+  "coverImageUrl": "string|null",
+  "seo": {
+    "title": "string|null",
+    "description": "string|null",
+    "ogImageUrl": "string|null",
+    "canonicalUrl": "string|null"
+  },
+  "tagSlugs": ["string"],
+  "categorySlug": "string|null"
+}
+
+
+Reglas:
+
+Si slug es null: se autogenera desde title.
+
+tagSlugs puede ser vacío.
+
+3.4 PostUpdateInput
+
+Igual al create, pero parcial permitido.
+
+{
+  "title": "string|null",
+  "slug": "string|null",
+  "excerpt": "string|null",
+  "contentMd": "string|null",
+  "coverImageUrl": "string|null",
+  "seo": {
+    "title": "string|null",
+    "description": "string|null",
+    "ogImageUrl": "string|null",
+    "canonicalUrl": "string|null"
+  },
+  "tagSlugs": ["string"] ,
+  "categorySlug": "string|null"
+}
+
+3.5 PublishInput
+{ "publish": true }
+
+3.6 ErrorResponse
+{
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": "object|null"
+  },
+  "requestId": "string"
+}
+
+
+Códigos recomendados:
+
+UNAUTHORIZED, FORBIDDEN, VALIDATION_ERROR, NOT_FOUND, CONFLICT, INTERNAL_ERROR
+
+4. Endpoints Públicos (Blog)
+
+Estos endpoints sirven al frontend público y permiten centralizar cache/ISR.
+
+4.1 Listar posts publicados
+
+GET /api/public/posts
+
+Query Params
+
+Param	Tipo	Default	Descripción
+page	number	1	paginación
+pageSize	number	10	tamaño
+q	string	-	búsqueda por título/excerpt
+tag	string	-	filtrar por tagSlug
+
+200 OK
+
+{
+  "items": [ { "id":"uuid","title":"...","slug":"...","excerpt":null,"publishedAt":"...","coverImageUrl":null,"tags":[] } ],
+  "page": 1,
+  "pageSize": 10,
+  "total": 42
+}
+
+
+Errores
+
+400 VALIDATION_ERROR
+
+500 INTERNAL_ERROR
+
+4.2 Obtener post publicado por slug
+
+GET /api/public/posts/{slug}
+
+200 OK → PostDTO (status siempre published)
+404 NOT_FOUND si no existe o está draft.
+
+5. Endpoints Admin (CRUD Posts)
+
+Requieren sesión admin válida.
+Se recomienda proteger con middleware.ts y una verificación adicional en handler.
+
+5.1 Listar posts (admin)
+
+GET /api/admin/posts
+
+Query Params
+
+Param	Tipo	Descripción
+status	`draft	published
+q	string	búsqueda
+page/pageSize	number	paginación
+
+200 OK
+
+{
+  "items": [ { "id":"uuid","title":"...","slug":"...","excerpt":null,"publishedAt":null,"coverImageUrl":null,"tags":[] } ],
+  "page": 1,
+  "pageSize": 20,
+  "total": 7
+}
+
+
+Errores
+
+401 UNAUTHORIZED
+
+403 FORBIDDEN
+
+5.2 Crear post
+
+POST /api/admin/posts
+Body → PostCreateInput
+
+201 Created
+
+{ "item": { /* PostDTO */ } }
+
+
+Errores
+
+400 VALIDATION_ERROR
+
+401 UNAUTHORIZED
+
+403 FORBIDDEN
+
+409 CONFLICT (slug duplicado)
+
+5.3 Obtener post por id (admin)
+
+GET /api/admin/posts/{id}
+
+200 OK → PostDTO (draft o published)
+404 si no existe
+
+5.4 Actualizar post
+
+PUT /api/admin/posts/{id}
+Body → PostUpdateInput
+
+200 OK
+
+{ "item": { /* PostDTO */ } }
+
+
+Errores
+
+400 VALIDATION_ERROR
+
+401/403
+
+404 NOT_FOUND
+
+409 CONFLICT (slug duplicado)
+
+5.5 Publicar / despublicar
+
+PATCH /api/admin/posts/{id}/publish
+Body → PublishInput (publish true/false)
+
+200 OK
+
+{ "item": { /* PostDTO */ } }
+
+
+Reglas:
+
+Si publish=true → set status='published' + publishedAt=now()
+
+Si publish=false → set status='draft' + publishedAt=null
+
+5.6 Borrar post
+
+DELETE /api/admin/posts/{id}
+
+204 No Content
+
+Errores:
+
+401/403
+
+404
+
+6. Endpoints Taxonomía (opcional pero útil)
+6.1 Listar tags (público)
+
+GET /api/public/tags
+
+200 OK
+
+{ "items": [ { "id":"uuid","name":"Impuestos","slug":"impuestos" } ] }
+
+6.2 CRUD tags (admin)
+
+POST /api/admin/tags
+
+PUT /api/admin/tags/{id}
+
+DELETE /api/admin/tags/{id}
+
+Si se quiere simplificar MVP: gestionar tags inline al post (crear si no existe) y evitar endpoints dedicados.
+
+7. Mini-test (sin persistencia)
+
+No requiere endpoints en MVP.
+
+El cálculo se hace client-side.
+
+Se trackea con analytics.
+
+Si se quisiera endpoint (futuro):
+
+POST /api/public/test-health/compute con TestInput y devuelve TestResultDTO.
+
+8. Códigos HTTP (resumen)
+Caso	Código
+OK GET	200
+Crear	201
+Delete	204
+Validación	400
+No autenticado	401
+No autorizado	403
+No encontrado	404
+Conflicto (slug)	409
+Error servidor	500

@@ -1,0 +1,317 @@
+# Documento 2 — Requisitos Funcionales (Historias de Usuario) y No Funcionales
+Proyecto: Landing + Blog/Insights + Mini-test + Admin (CDR)
+
+## 1. Alcance del Documento
+Este documento define:
+- **Requisitos Funcionales** en formato **Historias de Usuario** + **Criterios de Aceptación**
+- **Requisitos No Funcionales** (calidad, seguridad, rendimiento, SEO, observabilidad)
+- **Reglas de negocio** clave (CTA sin filtro, test no bloqueante)
+
+---
+
+## 2. Actores y Roles
+| Actor/Rol | Descripción | Permisos |
+|---|---|---|
+| Visitante (anónimo) | Usuario que navega el sitio público | Ver landing, leer blog, usar test, compartir, agendar |
+| Admin (Antonio) | Único administrador del contenido | Login, CRUD posts, publicar/draft, SEO metadata |
+| Sistema (integraciones) | Calendly, Supabase, Analytics | Registrar eventos, auth, persistencia de posts |
+
+---
+
+## 3. Reglas de Negocio (Business Rules)
+| ID | Regla | Motivación |
+|---|---|---|
+| BR-01 | El CTA principal es **“Agendá reunión 30 min”** y debe estar disponible sin filtro previo | El filtro se realiza en la reunión |
+| BR-02 | El mini-test **no bloquea** la agenda; es un acelerador persuasivo | Maximizar conversión |
+| BR-03 | No se usará WhatsApp como canal de soporte/contacto por ahora; solo **share** en posts | Decisión explícita del negocio |
+| BR-04 | No se muestran precios en el sitio | Decisión del negocio |
+| BR-05 | Idioma inicial: **Español** | Decisión del negocio |
+| BR-06 | Admin único: Antonio | Operación simple |
+
+---
+
+## 4. Épicas y Features (Mapa Funcional)
+| Épica | Objetivo | Features |
+|---|---|---|
+| E1 — Landing | Convertir visitas en agendas | Secciones, CTAs, FAQ, prueba social (si se incorpora), footer |
+| E2 — Agenda (Calendly) | Agendar reunión en 30 min | Botones, modal/redirect, tracking |
+| E3 — Mini-test Salud | Persuadir hacia la reunión | Form 4 inputs, resultado, CTA |
+| E4 — Blog/Insights | Canal de contenido propio | Listado, detalle, tags/categorías, share |
+| E5 — Admin | Publicar contenido sin dev | Login, CRUD posts, SEO por post |
+| E6 — SEO/Analytics | Medición y adquisición | Metadata, sitemap, eventos, Search Console (config) |
+| E7 — Operación | Mantener confiabilidad | Backups, despliegue, monitoreo básico |
+
+---
+
+## 5. Requisitos Funcionales — Historias de Usuario
+
+### 5.1 E1 — Landing (Sitio Público)
+
+#### US-01 — Ver propuesta de valor y CTA principal
+**Como** visitante, **quiero** entender en 5–10 segundos qué ofrece CDR y agendar una reunión, **para** resolver mis problemas de planificación fiscal/financiera/estratégica.
+
+**Criterios de aceptación**
+- Debe existir un **Hero** con:
+  - propuesta de valor clara (beneficio + enfoque estratégico)
+  - CTA primario: **“Agendá reunión 30 min”**
+- CTA visible en **primer scroll** (mobile y desktop)
+- CTA debe llevar a Calendly (ver E2)
+
+#### US-02 — Navegar secciones de servicios
+**Como** visitante, **quiero** ver servicios y resultados esperables, **para** decidir si aplica a mi empresa.
+
+**Criterios de aceptación**
+- Sección “Servicios” con al menos 3 bloques:
+  - Planificación fiscal
+  - Planificación financiera
+  - Planificación estratégica / CFO Fractional
+- Cada bloque incluye: problema → enfoque → beneficio (copy orientado a decisiones)
+
+#### US-03 — Entender el método de trabajo
+**Como** visitante, **quiero** entender el proceso (5 pasos), **para** confiar en que hay método y ejecución.
+
+**Criterios de aceptación**
+- Sección “Proceso” mostrando: Diagnóstico → Estrategia → Implementación → Entrenamiento → Monitoreo
+- Cada paso con micro-descripción (1–2 líneas)
+
+#### US-04 — Consultar preguntas frecuentes
+**Como** visitante, **quiero** ver FAQs, **para** despejar objeciones sin contactarme.
+
+**Criterios de aceptación**
+- Sección FAQ con formato acordeón
+- Incluye FAQs mínimas sugeridas:
+  - “¿Para quién es este servicio?”
+  - “¿Qué pasa en la reunión de 30 min?”
+  - “¿Qué necesito preparar?”
+  - “¿Cómo trabajamos luego del diagnóstico?”
+
+#### US-05 — CTA persistente (sticky)
+**Como** visitante móvil, **quiero** tener el CTA siempre a mano, **para** agendar cuando ya me convencí.
+
+**Criterios de aceptación**
+- En mobile, botón sticky (o barra inferior) con “Agendá reunión 30 min”
+- No debe tapar contenido crítico ni accesibilidad
+
+---
+
+### 5.2 E2 — Integración de Agenda (Calendly)
+
+#### US-06 — Abrir Calendly desde CTA
+**Como** visitante, **quiero** abrir el calendario de CDR, **para** agendar una reunión de 30 minutos.
+
+**Criterios de aceptación**
+- Desde cualquier CTA se debe abrir Calendly (modal embebido o redirect)
+- Debe soportar UTM parameters cuando existan (para atribución)
+- Debe registrarse un evento de analytics: `cta_calendly_click` con contexto (ubicación del CTA)
+
+---
+
+### 5.3 E3 — Mini-test “Salud de tu empresa”
+
+#### US-07 — Completar el test con 4 entradas
+**Como** visitante, **quiero** completar un test corto, **para** recibir un diagnóstico inicial y saber si necesito reunirme ya.
+
+**Criterios de aceptación**
+- El test solicita **exactamente 4 entradas** (definición final en arquitectura/UX, pero el sistema debe soportar):
+  - Inputs numéricos y/o select (según UX final)
+- Validaciones:
+  - obligatorios
+  - rangos coherentes (ej. no negativos)
+- UX: máximo 1–2 pantallas; progreso claro
+
+#### US-08 — Ver resultado + mensaje persuasivo
+**Como** visitante, **quiero** recibir un resultado comprensible, **para** entender urgencia y siguiente paso.
+
+**Criterios de aceptación**
+- Al enviar el test, se muestra:
+  - Score o categoría (Ej: “Salud crítica / media / buena”)
+  - Mensaje tipo: “Tenés que coordinar una reunión ya antes de que…”
+  - CTA inmediato a Calendly
+- El test **no bloquea** agendar sin hacerlo (BR-02)
+
+#### US-09 — Medir uso del test
+**Como** negocio, **quiero** medir cuántos completan el test y convierten, **para** optimizar.
+
+**Criterios de aceptación**
+- Evento `test_started`
+- Evento `test_completed` con resultado (no datos sensibles)
+- Evento `test_cta_calendly_click`
+
+---
+
+### 5.4 E4 — Blog/Insights (Público)
+
+#### US-10 — Ver listado de posts
+**Como** visitante, **quiero** ver un listado de artículos, **para** aprender y evaluar autoridad.
+
+**Criterios de aceptación**
+- Página `/blog` con cards: título, excerpt, fecha, tags/categoría (si aplica)
+- Orden por fecha desc
+- Paginación o “load more” (decisión técnica)
+- SEO: title y meta description de la página
+
+#### US-11 — Leer un post (detalle)
+**Como** visitante, **quiero** abrir un artículo, **para** leerlo completo.
+
+**Criterios de aceptación**
+- URL amigable: `/blog/<slug>`
+- Render del contenido con headings, listas, links
+- CTA embebido: “Agendá reunión 30 min” (arriba o abajo)
+
+#### US-12 — Compartir un post en LinkedIn
+**Como** visitante, **quiero** compartir el post en LinkedIn, **para** enviarlo a mi red.
+
+**Criterios de aceptación**
+- Botón “Compartir en LinkedIn”
+- Al click, abre diálogo/flujo de compartir con URL del post
+- Evento `share_linkedin`
+
+#### US-13 — Compartir un post en WhatsApp
+**Como** visitante, **quiero** compartir el post en WhatsApp, **para** reenviarlo a un contacto o grupo.
+
+**Criterios de aceptación**
+- Botón “Compartir en WhatsApp”
+- En mobile abre `wa.me` con el link prellenado; en desktop comportamiento compatible
+- Evento `share_whatsapp`
+
+---
+
+### 5.5 E5 — Admin (Antonio)
+
+#### US-14 — Login de Admin
+**Como** admin, **quiero** iniciar sesión, **para** administrar el blog.
+
+**Criterios de aceptación**
+- Login con Supabase Auth
+- Solo usuarios autorizados pueden acceder a `/admin`
+- Rate limit / protección básica contra brute force (ver NFR seguridad)
+
+#### US-15 — Crear post
+**Como** admin, **quiero** crear un post, **para** publicarlo en el blog.
+
+**Criterios de aceptación**
+- Form con campos mínimos:
+  - título
+  - slug (autogenerable/editable)
+  - contenido (editor markdown o rich text; decisión técnica)
+  - estado: draft/published
+  - fecha (auto)
+  - tags/categoría (opcional pero recomendado)
+  - meta title + meta description (SEO)
+  - imagen destacada (opcional)
+- Guardado en Supabase
+
+#### US-16 — Editar post y mantener historial básico
+**Como** admin, **quiero** editar un post, **para** corregir o actualizar contenido.
+
+**Criterios de aceptación**
+- Editar campos de US-15
+- Campo `updated_at` debe actualizarse
+- No se requiere versionado completo (por ahora)
+
+#### US-17 — Publicar / Despublicar
+**Como** admin, **quiero** publicar o despublicar, **para** controlar qué ve el público.
+
+**Criterios de aceptación**
+- Toggle draft/published
+- Los drafts no deben ser accesibles públicamente (ni indexables)
+
+#### US-18 — Listar y buscar posts en admin
+**Como** admin, **quiero** ver mi listado de posts, **para** gestionarlos rápido.
+
+**Criterios de aceptación**
+- Tabla/lista con filtros: status (draft/published), búsqueda por título/slug
+- Acciones: editar, publicar/despublicar, borrar
+
+---
+
+### 5.6 E6 — SEO / Analytics
+
+#### US-19 — SEO base del sitio
+**Como** negocio, **quiero** que el sitio sea encontrable, **para** adquirir orgánico.
+
+**Criterios de aceptación**
+- Sitemap generado automáticamente
+- robots.txt configurado
+- OG tags por página y por post (para previews en LinkedIn)
+- Schema básico (ProfessionalService/Organization) — detalle en Doc 3/5
+
+#### US-20 — Analítica de conversión
+**Como** negocio, **quiero** medir CTAs y comportamiento, **para** optimizar conversiones.
+
+**Criterios de aceptación**
+- Tracking de:
+  - `cta_calendly_click`
+  - `test_*` (ver US-09)
+  - `share_*` (ver US-12/13)
+- Consent/cookies: no requerido por ahora (si el tracking lo exigiera, se revisa)
+
+---
+
+## 6. Priorización (MVP vs Should vs Could)
+| Prioridad | Incluye |
+|---|---|
+| MVP (Must) | Landing completa (E1), Calendly (E2), Blog público (E4), Admin CRUD posts (E5), SEO base y eventos mínimos (E6), Mini-test básico (E3) |
+| Should | Tags/categorías + búsqueda blog, OG image por post, FAQ ampliada, prueba social |
+| Could | Newsletter simple, lead magnet descargable, micrositios por servicio, multi-idioma |
+| Won’t (ahora) | Publicación automática a LinkedIn, portal clientes, multi-rol, WhatsApp contacto |
+
+---
+
+## 7. Requisitos No Funcionales (NFR)
+
+### 7.1 Rendimiento y Experiencia
+| ID | Requisito |
+|---|---|
+| NFR-PERF-01 | Tiempo de carga rápido en mobile; SSR/SSG para landing y posts |
+| NFR-PERF-02 | Imágenes optimizadas (lazy load, tamaños responsivos) |
+| NFR-PERF-03 | UI accesible (labels, focus states, contraste aceptable) |
+
+### 7.2 SEO y Compartibilidad
+| ID | Requisito |
+|---|---|
+| NFR-SEO-01 | Metadata por ruta (title/description) y por post |
+| NFR-SEO-02 | OG/Twitter cards correctas para preview en LinkedIn/WhatsApp |
+| NFR-SEO-03 | URLs estables (slug) y canonical por post |
+
+### 7.3 Seguridad (OWASP-oriented)
+| ID | Requisito |
+|---|---|
+| NFR-SEC-01 | Admin protegido con Supabase Auth y autorización por rol/claim |
+| NFR-SEC-02 | Protección contra XSS en rendering del contenido del blog (sanitizado/escape) |
+| NFR-SEC-03 | CSRF: mitigación según estrategia (tokens/headers) para operaciones mutantes |
+| NFR-SEC-04 | Rate limiting en login y endpoints sensibles (si aplica) |
+| NFR-SEC-05 | Headers de seguridad (CSP, HSTS, X-Frame-Options/Frame-ancestors, etc.) |
+| NFR-SEC-06 | Secrets gestionados por variables de entorno (Vercel) |
+
+### 7.4 Confiabilidad / Operación
+| ID | Requisito |
+|---|---|
+| NFR-OPS-01 | Deploy automático a Vercel desde repo (CI/CD) |
+| NFR-OPS-02 | Backups de Supabase (política a definir en Doc 3/4) |
+| NFR-OPS-03 | Logging mínimo para errores del frontend y acciones admin críticas |
+
+### 7.5 Mantenibilidad
+| ID | Requisito |
+|---|---|
+| NFR-MNT-01 | Código en TypeScript con linting y convenciones claras |
+| NFR-MNT-02 | Arquitectura modular (Clean Architecture adaptada a frontend + services) |
+| NFR-MNT-03 | Componentización UI y separación de dominio vs infraestructura |
+
+---
+
+## 8. Supuestos y Dependencias
+| Tipo | Ítem |
+|---|---|
+| Dependencia | Calendly (cuenta y link definitivo) |
+| Dependencia | Supabase project listo (Auth + DB) |
+| Dependencia | Dominio/brand assets (logo, tipografías, fotos si aplica) |
+| Supuesto | No habrá multi-idioma en MVP |
+| Supuesto | No habrá pricing público |
+| Supuesto | Contenido lo redacta Antonio |
+
+---
+
+## Validación
+Si este Documento 2 está **Correcto**, respondé: **“Correcto”** o **“Siguiente”**  
+y paso al **Documento 3 — Arquitectura de Software (CRÍTICO)** (stack, árbol de directorios Clean Architecture, patrones obligatorios).

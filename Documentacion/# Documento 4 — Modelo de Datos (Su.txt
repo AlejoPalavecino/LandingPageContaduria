@@ -1,0 +1,171 @@
+# Documento 4 — Modelo de Datos (Supabase / Postgres)
+Proyecto: Landing + Blog/Insights + Mini-test + Admin (CDR)
+
+## 1. Objetivo del Modelo
+Diseñar un modelo mínimo, escalable y seguro para:
+- **Blog/Insights** (posts públicos)
+- **Taxonomía** (tags/categorías) opcional pero recomendada
+- **Auditoría básica** (created_at/updated_at, author)
+- **Seguridad** mediante **RLS** (Row Level Security) en Supabase
+
+> Nota: El mini-test no requiere persistencia de inputs en MVP (solo tracking de eventos en analytics).
+
+---
+
+## 2. Entidades y Relaciones
+### 2.1 Diagrama lógico (texto)
+- `posts` (1) — (N) `post_tags` — (1) `tags`
+- `posts` (N) — (1) `categories` (opcional; si se usa solo 1 categoría por post)
+
+---
+
+## 3. Tablas (definición detallada)
+
+## 3.1 `posts`
+Almacena artículos del blog.
+
+| Campo | Tipo Postgres | Nullable | Default | Descripción |
+|---|---|---:|---|---|
+| id | `uuid` | No | `gen_random_uuid()` | PK |
+| title | `text` | No |  | Título visible |
+| slug | `text` | No |  | URL slug único |
+| excerpt | `text` | Sí |  | Resumen para cards y SEO |
+| content_md | `text` | No |  | Contenido Markdown fuente |
+| content_html | `text` | Sí |  | HTML renderizado (opcional; ver nota) |
+| status | `text` | No | `'draft'` | `draft` / `published` |
+| published_at | `timestamptz` | Sí |  | Fecha publicación |
+| cover_image_url | `text` | Sí |  | URL imagen destacada |
+| seo_title | `text` | Sí |  | Meta title |
+| seo_description | `text` | Sí |  | Meta description |
+| og_image_url | `text` | Sí |  | Imagen OG (si no usa cover) |
+| canonical_url | `text` | Sí |  | Canonical (si aplica) |
+| reading_time_min | `int` | Sí |  | Calculado (opcional) |
+| author_id | `uuid` | Sí |  | Referencia a `auth.users.id` (si se usa) |
+| created_at | `timestamptz` | No | `now()` | Auditoría |
+| updated_at | `timestamptz` | No | `now()` | Auditoría |
+
+**Restricciones / checks**
+- `status in ('draft','published')`
+- `slug` unique
+- Si `status='published'` entonces `published_at is not null` (se puede forzar con trigger)
+
+**Notas de implementación**
+- Opción A (recomendada): guardar **solo `content_md`** y renderizar a HTML server-side (Next) con sanitización al momento de servir.
+- Opción B: guardar también `content_html` pre-renderizado (mejor performance, pero obliga a sanitizar al guardar y gestionar consistencia).  
+Para MVP: **A**.
+
+---
+
+## 3.2 `tags`
+| Campo | Tipo | Nullable | Default | Descripción |
+|---|---|---:|---|---|
+| id | `uuid` | No | `gen_random_uuid()` | PK |
+| name | `text` | No |  | Nombre tag (“impuestos”, “cashflow”) |
+| slug | `text` | No |  | slug único |
+| created_at | `timestamptz` | No | `now()` |  |
+
+**Restricciones**
+- `slug` unique
+
+---
+
+## 3.3 `post_tags` (tabla puente)
+| Campo | Tipo | Nullable | Default | Descripción |
+|---|---|---:|---|---|
+| post_id | `uuid` | No |  | FK -> posts.id |
+| tag_id | `uuid` | No |  | FK -> tags.id |
+| created_at | `timestamptz` | No | `now()` |  |
+
+**PK compuesta**
+- `(post_id, tag_id)`
+
+---
+
+## 3.4 `categories` (opcional)
+Si se quiere 1 categoría por post (simple), se agrega `category_id` a `posts` y una tabla `categories`.
+
+### `categories`
+| Campo | Tipo | Nullable | Default | Descripción |
+|---|---|---:|---|---|
+| id | `uuid` | No | `gen_random_uuid()` | PK |
+| name | `text` | No |  | Nombre (“Fiscal”, “Finanzas”) |
+| slug | `text` | No |  | slug único |
+| created_at | `timestamptz` | No | `now()` |  |
+
+### Modificación en `posts`
+- `category_id uuid null references categories(id)`
+
+> Decisión recomendada: **Tags sí (útil para SEO y navegación)**; Categorías: opcional.
+
+---
+
+## 4. Índices recomendados
+| Tabla | Índice | Motivo |
+|---|---|---|
+| posts | `unique(slug)` | Lookup por URL |
+| posts | `index(status, published_at desc)` | Listado de publicados |
+| posts | `index(updated_at desc)` | Admin listado |
+| tags | `unique(slug)` | Navegación por tag |
+| post_tags | `index(tag_id)` | Posts por tag |
+
+---
+
+## 5. Políticas de Seguridad (Supabase RLS)
+### 5.1 Principios
+- Público: solo puede **leer posts publicados**.
+- Admin autenticado: puede **CRUD** en posts/tags.
+- Implementación: RLS ON + policies explícitas.
+
+### 5.2 Requisito: “Admin único”
+Hay dos estrategias:
+
+**Estrategia A (Simple y suficiente): Allowlist por email**
+- Se define `ADMIN_EMAIL_ALLOWLIST` (env en backend) y se valida en middleware + endpoints.
+- En DB, policies se basan en `auth.role()` y `auth.email()` (si está disponible) o en una tabla `admins`.
+
+**Estrategia B (Enterprise): Tabla `admins`**
+- Tabla `admins(user_id uuid primary key references auth.users(id))`
+- Policies verifican que `exists(select 1 from admins where user_id = auth.uid())`
+
+✅ Recomendación: **Estrategia B** (más limpia y explícita).
+
+---
+
+## 6. Tabla adicional recomendada: `admins`
+| Campo | Tipo | Nullable | Default | Descripción |
+|---|---|---:|---|---|
+| user_id | `uuid` | No |  | PK, FK -> auth.users |
+| created_at | `timestamptz` | No | `now()` | Auditoría |
+
+---
+
+## 7. Políticas RLS (pseudopolíticas)
+> Nota: el SQL exacto se puede entregar al Líder Técnico, pero dejo el diseño cerrado acá.
+
+### 7.1 `posts`
+- **SELECT público**: permitido si `status='published'`
+- **SELECT admin**: permitido si user está en `admins`
+- **INSERT/UPDATE/DELETE**: solo admins
+
+### 7.2 `tags` y `post_tags`
+- **SELECT público**: permitido (para navegación y mostrar tags)
+- **INSERT/UPDATE/DELETE**: solo admins
+
+### 7.3 `categories` (si aplica)
+- Igual a tags
+
+---
+
+## 8. Migraciones (estructura recomendada)
+- Usar Supabase migrations:
+  - `001_create_posts.sql`
+  - `002_create_tags.sql`
+  - `003_create_post_tags.sql`
+  - `004_create_admins.sql`
+  - `005_enable_rls_and_policies.sql`
+
+---
+
+## 9. Validación
+Si este Documento 4 está **Correcto**, respondé: **“Correcto”** o **“Siguiente”**  
+y paso al **Documento 5 — UX/UI** (mapa del sitio, estilo visual, componentes base, y comportamiento del mini-test).

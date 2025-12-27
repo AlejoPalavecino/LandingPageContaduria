@@ -1,0 +1,229 @@
+# Documento 5 — UX/UI (Mapa del sitio, estilo visual, componentes base)
+Proyecto: Landing + Blog/Insights + Mini-test + Admin (CDR)
+
+## 1. Objetivo UX
+- **Primario:** maximizar clics y agendas a **“Agendá reunión 30 min”**.
+- **Secundario:** construir autoridad (contenido + método) y facilitar difusión (share LinkedIn/WhatsApp).
+- **Tono:** premium, directo, orientado a decisión/resultado (CFO Fractional).
+
+---
+
+## 2. Mapa del Sitio
+| Área | Ruta | Descripción | Acceso |
+|---|---|---|---|
+| Landing | `/` | Página principal orientada a conversión | Público |
+| Blog listado | `/blog` | Listado de artículos, búsqueda/filtros | Público |
+| Blog detalle | `/blog/[slug]` | Artículo individual + share + CTA | Público |
+| Mini-test (opcional) | `/test-salud` | Test “salud financiera” dedicado | Público |
+| Admin login | `/admin/login` | Acceso admin | Privado |
+| Admin posts | `/admin/posts` | Listado, buscar, acciones | Privado |
+| Admin crear | `/admin/posts/new` | Crear post | Privado |
+| Admin editar | `/admin/posts/[id]` | Editar / publicar / borrar | Privado |
+
+**Navegación recomendada (header):** Logo CDR + “Servicios” + “Proceso” + “Blog” + CTA “Agendá reunión”.
+
+---
+
+## 3. Estructura de la Landing (wireframe textual)
+### 3.1 Orden de secciones (recomendado)
+1) **Hero (Above the fold)**
+   - H1: resultado + enfoque (estratégico)
+   - Subcopy: planificación fiscal + financiera + estratégica para PYMEs
+   - CTA primario: **Agendá reunión 30 min**
+   - CTA secundario: “Hacé el test de salud” (ancla a sección test o a `/test-salud`)
+
+2) **Dolores (Problemas comunes)**
+   - 4–6 bullets cortos (ej.: “pagás de más”, “no sabés tu margen real”, “caja impredecible”)
+
+3) **Servicios (3 cards)**
+   - Planificación fiscal
+   - Planificación financiera
+   - CFO Fractional (estrategia + tableros + decisiones)
+
+4) **Mini-test (embed en landing)**
+   - 4 inputs + botón “Ver mi resultado”
+   - Resultado con CTA a reunión
+
+5) **Proceso (5 pasos)**
+   - Diagnóstico → Estrategia → Implementación → Entrenamiento → Monitoreo
+
+6) **Beneficios (Resultados esperables)**
+   - “Decisiones con datos”
+   - “Previsibilidad de caja”
+   - “Optimización fiscal legal”
+   - “Orden financiero sin sumar estructura fija”
+
+7) **FAQ**
+   - Objeciones típicas (ver sección 8)
+
+8) **CTA final + footer**
+   - CTA grande + microcopy (“30 min, sin costo, para entender tu caso” si aplica)
+
+---
+
+## 4. Sistema Visual (Design System)
+### 4.1 Principios visuales
+- **Minimalismo premium:** mucho espacio en blanco, tipografía sólida, pocos colores.
+- **Confianza + claridad:** iconografía simple, estructura en cards, números grandes para método/resultados.
+- **Sensación “CFO”:** grid limpio, métricas/indicadores como recurso visual.
+
+### 4.2 Tokens de diseño (propuesta)
+> Se pueden ajustar al branding final, pero este set funciona muy bien para finanzas/consultoría.
+
+| Token | Valor sugerido | Uso |
+|---|---|---|
+| Color base | Navy/Slate oscuro | Header, títulos, fondos alternos |
+| Color texto | Gris oscuro | Body text |
+| Color acento | Verde/Esmeralda (o Cian) | CTAs, links, highlights |
+| Fondo | Blanco + gris muy claro | Secciones y cards |
+| Bordes | Gris suave | Cards, inputs |
+| Radio | 16–24px | Cards y botones (premium) |
+| Sombra | Suave | Elevación sutil en cards |
+
+### 4.3 Tipografía
+| Elemento | Estilo recomendado |
+|---|---|
+| Headings | Sans moderna (peso 600–700), tracking leve |
+| Body | Sans legible (peso 400–500), line-height cómodo |
+| Números / KPIs | Variante tabular o semibold (para “sensación financiera”) |
+
+---
+
+## 5. Componentes Base (UI Kit)
+| Componente | Variantes | Notas UX |
+|---|---|---|
+| Button | Primary / Secondary / Ghost | Primary = CTA Calendly |
+| Sticky CTA | Mobile bottom bar | No tapar inputs; cerrar opcional |
+| Card | Servicio / Beneficio / Post | Sombra suave + borde |
+| Accordion | FAQ | Animación sutil |
+| Input | Number / Select / Toggle | Validación inline |
+| Badge | Tag / Category | Clickable en blog |
+| ShareButtons | LinkedIn / WhatsApp | Icon + texto |
+| Toast / Alert | Success / Error | Para acciones admin |
+| Editor | Markdown + preview | Simple y rápido para Antonio |
+| Table (Admin) | Posts list | Filtros + acciones rápidas |
+
+---
+
+## 6. UX del Mini-test “Salud de tu empresa”
+### 6.1 Objetivo
+Persuadir con una lectura simple del estado y disparar urgencia hacia la reunión.
+
+### 6.2 Inputs (4 entradas) — definidos para MVP
+> Mezcla de números + selección para que sea rápido y “sin fricción”.
+
+| # | Campo | Tipo | Ejemplo | Por qué |
+|---:|---|---|---|---|
+| 1 | Facturación mensual promedio | Número | 3.500.000 | Indica escala y capacidad de planificación |
+| 2 | Margen neto estimado (%) | Número (0–60) | 12 | Señal de rentabilidad real |
+| 3 | Meses de caja (runway) | Select (0–1 / 2–3 / 4–6 / 7+) | 2–3 | Mide riesgo de liquidez |
+| 4 | Control financiero mensual | Select (Sí / Parcial / No) | Parcial | Mide madurez (presupuesto, flujo, KPIs) |
+
+**Validaciones:**
+- Facturación: > 0 (o permitir 0 para “pre-revenue” con mensaje específico)
+- Margen: 0–60 (si >60, advertir “revisar cálculo”)
+- Runway: obligatorio
+- Control: obligatorio
+
+### 6.3 Lógica de scoring (simple, entendible)
+- Score total: **0–100**
+- Regla:
+  - Margen neto: 0–30 pts
+  - Runway: 0–35 pts
+  - Control mensual: 0–25 pts
+  - Facturación: 0–10 pts (solo para calibrar contexto, no “castigar” a chicos)
+
+**Categorías**
+| Categoría | Score | Copy de resultado (base) |
+|---|---:|---|
+| Salud crítica | 0–39 | “Estás en zona de riesgo. Coordiná una reunión ya antes de que la falta de control te cueste caja e impuestos.” |
+| En riesgo | 40–69 | “Hay señales de alerta. Con planificación fiscal y financiera podés evitar decisiones caras.” |
+| Estable (con potencial) | 70–100 | “Vas bien, pero podés ganar previsibilidad y rentabilidad con estrategia y control.” |
+
+**CTA del resultado (siempre)**
+- Botón primario: **“Agendá reunión 30 min”**
+- Microcopy: “En la reunión vemos tu caso y definimos próximos pasos.”
+
+### 6.4 UI del test (embed + page)
+- En landing: versión compacta (card) con 4 inputs en 2 filas.
+- En `/test-salud`: versión “full” con explicación breve y resultados más ricos (bullets: “Riesgo de caja”, “Oportunidad fiscal”, “Orden de KPIs”).
+
+### 6.5 Eventos a medir (para optimización)
+- `test_started`
+- `test_completed` (categoría)
+- `test_cta_calendly_click`
+
+---
+
+## 7. UX del Blog (autoridad + difusión)
+### 7.1 Listado `/blog`
+- Header: “Insights fiscales y financieros para PYMEs”
+- Búsqueda: “Buscar por tema…”
+- Filtros: tags (chips)
+- Cards con:
+  - título, excerpt, fecha, tags
+  - CTA pequeño: “Leer”
+- CTA persistente (más discreto que en landing): “Agendá reunión 30 min”
+
+### 7.2 Detalle `/blog/[slug]`
+- Encabezado con:
+  - Título + fecha + tags
+  - Botones: **Compartir LinkedIn** / **Compartir WhatsApp**
+- CTA embebido:
+  - arriba (post-intent) y abajo (post-conviction)
+- Recomendados: 3 posts relacionados (por tags)
+
+### 7.3 Reglas para “Share”
+| Canal | Comportamiento | Requisito clave |
+|---|---|---|
+| LinkedIn | abrir share con URL | OG tags correctos (title/desc/image) |
+| WhatsApp | `wa.me` con texto + URL | Mobile-first, fallback desktop |
+
+---
+
+## 8. Contenido y Microcopy (base)
+### 8.1 Hero (propuesta de copy)
+- **H1 (opción A):** “Planificación fiscal y financiera para decidir mejor y crecer con previsibilidad.”
+- **Subcopy:** “Acompaño PYMEs en sus primeros años con enfoque CFO Fractional: orden, control y estrategia para pagar lo justo y proyectar con claridad.”
+- **CTA:** “Agendá reunión 30 min”
+- **Secundario:** “Hacer test de salud”
+
+### 8.2 FAQ (mínimas recomendadas)
+| Pregunta | Respuesta (intención) |
+|---|---|
+| ¿Para quién es este servicio? | PYMEs tempranas, hasta 50 empleados, que buscan control y estrategia |
+| ¿Qué pasa en la reunión de 30 min? | Entender situación, objetivos y si tiene sentido avanzar |
+| ¿Necesito tener todo ordenado para empezar? | No, justamente se ordena en el proceso |
+| ¿Esto reemplaza a mi contador/estudio? | Se aclara el rol: dirección/planificación vs cumplimiento (según oferta final) |
+
+---
+
+## 9. Responsive & Accesibilidad
+- Mobile-first: CTA sticky, inputs grandes, spacing cómodo.
+- Accesibilidad:
+  - labels visibles (no solo placeholder)
+  - estados focus claros
+  - contrast ratio aceptable
+  - navegación por teclado en admin
+- Performance:
+  - imágenes optimizadas
+  - evitar scripts pesados; Calendly solo cargar cuando el usuario interactúe (lazy)
+
+---
+
+## 10. Admin UX (Antonio)
+- Login simple.
+- Listado posts con:
+  - filtro status (draft/published)
+  - búsqueda por título
+  - acciones rápidas (editar, publicar, borrar)
+- Editor:
+  - markdown textarea + preview
+  - checklist SEO (title/description/og image)
+  - preview del post antes de publicar
+
+---
+
+## Validación
+Si este Documento 5 está **Correcto**, respondé: **“Correcto”** o **“Siguiente”**  
+y paso al **Documento 6 — Contrato de API y DTOs** (endpoints BFF, inputs/outputs JSON, códigos HTTP).

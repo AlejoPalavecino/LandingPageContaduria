@@ -1,0 +1,123 @@
+# Documento 1 — Informe de Presentación (Resumen Ejecutivo y Alcance)
+Proyecto: Landing Page + Blog/Insights para **CDR** (Servicios de Planificación Fiscal, Financiera y Estratégica / Fractional CFO)
+
+## 1. Resumen Ejecutivo
+CDR necesita un sitio web que lo posicione como un profesional “CFO Fractional” (no “un contador más”), orientado a **PYMEs en etapa inicial** (primeros años) con **hasta 50 empleados**.  
+El **objetivo principal** del sitio es **agendar una reunión inicial de 30 minutos** (sin filtro previo; el descarte se realiza en la reunión).  
+Como objetivo secundario, el sitio debe incluir un **Blog/Insights** para publicar contenido (redactado por Antonio) y facilitar su **difusión en LinkedIn y WhatsApp** mediante botones de compartir.
+
+Además, se incorporará un **mini-test de “salud” del emprendimiento/empresa** con 4 entradas que entregue un resultado persuasivo y empuje a coordinar reunión (“tenés que coordinar una reunión ya…”).
+
+## 2. Objetivos del Negocio
+| Objetivo | Descripción | KPI sugerido |
+|---|---|---|
+| Conversión a reunión | Maximizar agendas a Calendly desde tráfico orgánico y social | CTR en CTA, % sesiones con click a Calendly, reuniones/mes |
+| Posicionamiento Premium | Enfatizar enfoque estratégico CFO + planificación fiscal/financiera | Tiempo en página, scroll depth, retorno directo |
+| Canal de contenido propio | Publicar artículos y usarlos como “hub” para repost | Posts/mes, shares (LinkedIn/WhatsApp), tráfico a posts |
+| Autoridad y confianza | Mostrar método de trabajo, beneficios y claridad | % visitas que llegan a sección “Proceso”, FAQ expand rate |
+
+## 3. Público Objetivo
+| Segmento | Características | Dolor típico | Mensaje clave |
+|---|---|---|---|
+| PYMEs tempranas (≤50 emp.) | Primeros años, crecimiento, decisiones improvisadas | Pagan impuestos sin estrategia, caja desordenada, utilidad “no aparece” | “Planificación fiscal + financiera + estratégica = mejores decisiones y más rentabilidad” |
+| Fundadores/Directores | Multitarea, foco en ventas/operación | No tienen dirección financiera (solo contabilidad) | “Te doy visión CFO sin costo fijo” |
+
+## 4. Propuesta de Valor (Value Proposition)
+**“De la precisión contable nace la estrategia fiscal y financiera que mejora la toma de decisiones y multiplica la rentabilidad.”**  
+Enfoque diferencial: **planificación fiscal + planificación financiera + visión estratégica** (CFO Fractional) para decidir con información real.
+
+## 5. Alcance Funcional (MVP + Extensiones)
+### 5.1 In-Scope (incluido)
+**A) Landing (pública)**
+- Home tipo landing con secciones:
+  - Hero: propuesta de valor + CTA “Agendá reunión 30 min”
+  - Servicios (Fiscal / Financiero / Estratégico + CFO Fractional)
+  - Problemas que resuelve (dolores del nicho)
+  - Método en 5 pasos (Diagnóstico → Estrategia → Implementación → Entrenamiento → Monitoreo)
+  - Beneficios (claros, orientados a resultados)
+  - FAQ
+  - CTA repetido + sticky CTA (desktop/mobile)
+
+**B) Integración Calendly**
+- Botones que abren Calendly (modal o redirect) según performance/UX.
+- Tracking de evento (analytics) en cada click.
+
+**C) Mini-test “Salud de tu empresa” (sin filtro para agenda)**
+- 4 inputs (definir variables exactas en Documento 2).
+- Resultado: score + mensaje accionable (copy persuasivo) + CTA inmediato a reunión.
+- Nota: no bloquea Calendly; impulsa conversión.
+
+**D) Blog/Insights (público)**
+- Listado de posts (con búsqueda básica y/o filtros por categoría/tag).
+- Vista detalle del post (con imagen destacada opcional).
+- Botones “Compartir en LinkedIn” y “Compartir en WhatsApp”.
+- CTA embebido dentro del post (agendar reunión).
+
+**E) Admin (privado – Antonio)**
+- Login (1 usuario admin).
+- CRUD de posts: crear/editar/publicar/borrador.
+- Campos SEO por post: title, meta description, slug, OG image.
+
+### 5.2 Out-of-Scope (por ahora)
+| Ítem | Motivo |
+|---|---|
+| WhatsApp como canal de contacto/soporte en tiempo real | Requerimiento explícito: “por ahora no se utilizará WhatsApp” (solo share) |
+| Automatización de publicación a LinkedIn | Se hará share fácil (botones). Automatizar implica complejidad/permiso/API |
+| Portal de clientes / subida de documentación | No requerido |
+| Multi-rol (editor/autor) | Solo Antonio admin |
+
+## 6. Alcance No Funcional (criterios de calidad)
+| Categoría | Requisito |
+|---|---|
+| Performance | Lighthouse alto; SSR/SSG para contenido público; carga rápida en mobile |
+| SEO | Sitemap, robots, metadata OG, schema básico, URLs limpias |
+| Seguridad | Auth seguro para admin, rate-limit en login, headers de seguridad, protección contra XSS/CSRF donde aplique |
+| Disponibilidad | Hosting en Vercel con despliegue continuo |
+| Mantenibilidad | Código en React + TypeScript con arquitectura limpia (detallada en Documento 3) |
+
+## 7. Stack y Restricciones (ya definidas)
+| Componente | Decisión |
+|---|---|
+| Frontend | React + TypeScript |
+| Hosting | Vercel |
+| Backend / DB | Supabase (Postgres + Auth + Storage si aplica) |
+| Scheduling | Calendly |
+| Admin | Solo Antonio (1 usuario) |
+
+## 8. Contenido Base (inventario inicial)
+| Sección | Contenido base esperado |
+|---|---|
+| Servicios | Planificación fiscal; planificación financiera; asesoramiento estratégico (CFO Fractional) |
+| Problemas que resuelve | Impuestos sin estrategia; crecimiento sin decisiones estratégicas; utilidad no visible; contabilidad sin dirección financiera |
+| Proceso | 5 pasos (diagnóstico → monitoreo) |
+| Beneficios | “Pagás lo justo”, “controlás caja e impuestos”, “decidís con info real”, “tranquilidad” |
+| Blog | 1 post semanal (redacta Antonio) |
+
+## 9. Métricas y Analítica (Definition of Done de negocio)
+- Eventos mínimos:
+  - Click CTA “Agendá reunión” (por ubicación: hero, sticky, footer, post)
+  - Finalización del mini-test + click CTA desde resultado
+  - Share LinkedIn / Share WhatsApp
+- Embudo:
+  - Sesiones → Click Calendly → Reunión agendada (si se puede medir con Calendly/UTM)
+
+## 10. Riesgos y Mitigaciones
+| Riesgo | Impacto | Mitigación |
+|---|---|---|
+| Copy poco diferenciado (“contador genérico”) | Baja conversión | Copy centrado en CFO Fractional + resultados + método + dolores concretos |
+| Blog sin constancia | Pierde efecto orgánico | Calendario editorial simple y reutilizable (1 post/semana) |
+| Mini-test confuso | Fricción | UX ultra simple (4 inputs), resultado claro, CTA inmediato |
+| Admin inseguro | Riesgo reputacional | Supabase Auth + hardening + buenas prácticas OWASP |
+
+## 11. Entregables
+1) Landing pública (producción)
+2) Integración Calendly + tracking
+3) Mini-test Salud de Empresa
+4) Blog público + Admin (CRUD posts)
+5) Setup SEO/Analytics básico
+
+---
+
+## Validación
+Si este Documento 1 está **Correcto**, respondé: **“Correcto”** o **“Siguiente”**  
+y paso al **Documento 2 — Requisitos Funcionales (Historias de Usuario) y No Funcionales**.
