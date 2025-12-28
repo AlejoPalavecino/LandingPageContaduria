@@ -426,16 +426,6 @@ const AboutPage: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
                    alt="Antonio Scordia - CFO Fractional" 
                    className="w-full h-[600px] object-cover object-top hover:scale-105 transition-transform duration-700"
                  />
-                 {/* Overlay con gradiente */}
-                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/60 via-transparent to-transparent pointer-events-none"></div>
-                 
-                 {/* Quote flotante con animación */}
-                 <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-premium max-w-xs hidden md:block border-l-4 border-brand-gold transform hover:scale-105 transition-transform duration-300">
-                    <Icons.Quote className="w-8 h-8 text-brand-gold/30 mb-2" />
-                    <p className="text-brand-navy font-serif italic text-lg leading-relaxed">
-                      "No necesitás trabajar más horas. Necesitás números que trabajen para vos."
-                    </p>
-                 </div>
                </div>
             </FadeInUp>
 
