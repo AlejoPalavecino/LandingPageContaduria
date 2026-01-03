@@ -12,7 +12,9 @@
 Landing page moderna y optimizada para **CDR - Camilo D. Rodríguez**, Contador Público y Especialista en Finanzas Corporativas que ofrece servicios de CFO Fractional para PYMEs.
 
 ### Objetivo Principal
+
 Convertir visitas en reuniones de 30 minutos mediante:
+
 - 🎨 Diseño profesional con animaciones suaves
 - 📝 Blog con contenido de valor sobre finanzas
 - 🧮 Mini-test de salud financiera empresarial
@@ -21,6 +23,7 @@ Convertir visitas en reuniones de 30 minutos mediante:
 ## ✨ Características
 
 ### Para Visitantes
+
 - **Landing Page**: Hero impactante, servicios, metodología de 5 pasos, FAQs
 - **Sección "Quién Soy"**: Presentación profesional con fondo animado
 - **Blog**: Artículos sobre finanzas con filtros por tags, búsqueda y posts relacionados
@@ -28,6 +31,7 @@ Convertir visitas en reuniones de 30 minutos mediante:
 - **Responsive**: Diseño mobile-first con sticky CTA
 
 ### Para Administradores
+
 - **Panel Admin** (`/admin`): Gestión completa de blog
   - Login seguro (contraseña temporal: `admin123`)
   - CRUD completo de posts
@@ -38,6 +42,7 @@ Convertir visitas en reuniones de 30 minutos mediante:
   - Cálculo automático de tiempo de lectura
 
 ### Seguridad
+
 - ✅ Sanitización de Markdown con DOMPurify (protección XSS)
 - ✅ Row Level Security (RLS) en Supabase
 - ✅ Variables de entorno para keys sensibles
@@ -46,6 +51,7 @@ Convertir visitas en reuniones de 30 minutos mediante:
 ## 🚀 Tech Stack
 
 ### Frontend
+
 - **React** 18.3.1 + **TypeScript** 5.8.2
 - **Vite** 6.2.0 (build ultrarrápido)
 - **Framer Motion** 11.15.0 (animaciones)
@@ -53,6 +59,7 @@ Convertir visitas en reuniones de 30 minutos mediante:
 - **TailwindCSS** (utility-first styling)
 
 ### Backend & Database
+
 - **Supabase** 2.39.7
   - PostgreSQL con Row Level Security (RLS)
   - Auth (email/password)
@@ -60,12 +67,14 @@ Convertir visitas en reuniones de 30 minutos mediante:
   - RESTful API auto-generada
 
 ### Arquitectura
+
 - **Clean Architecture** (Domain, Application, Infrastructure, Presentation)
 - **Repository Pattern** para abstracción de datos
 - **Use Cases** para lógica de negocio
 - **DTOs y Mappers** para transformación de datos
 
 ### Markdown & Security
+
 - **Marked** 11.1.1 (parsing Markdown → HTML)
 - **DOMPurify** 3.0.8 (sanitización XSS)
 
@@ -87,15 +96,18 @@ Este proyecto está listo para deployment en **Vercel**.
 4. **Deploy** 🚀
 
 Vercel detectará automáticamente Vite y usará la configuración óptima.
+
 - **Tailwind CSS** (via CDN, 0 config)
 - **Framer Motion** 11.15.0 (animaciones)
 - **Lucide React** 0.460.0 (iconos)
 
 ### Backend & Database
+
 - **Supabase** 2.39.7 (PostgreSQL + Auth + Storage)
 - **Clean Architecture** (Domain, Application, Infrastructure, Presentation)
 
 ### Content Processing
+
 - **marked** 11.1.1 (Markdown parser)
 - **DOMPurify** 3.0.8 (XSS protection)
 
@@ -179,14 +191,14 @@ Si querés conectar la base de datos real:
 
 ## 🎨 Rutas Disponibles
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Landing page principal |
-| `/about` | Quién soy (perfil de Camilo) |
-| `/blog` | Lista de artículos del blog |
-| `/blog/:slug` | Detalle de un artículo |
-| `/test-salud` | Mini-test de salud financiera |
-| `/admin` | Panel de administración (requiere login) |
+| Ruta          | Descripción                              |
+| ------------- | ---------------------------------------- |
+| `/`           | Landing page principal                   |
+| `/about`      | Quién soy (perfil de Camilo)             |
+| `/blog`       | Lista de artículos del blog              |
+| `/blog/:slug` | Detalle de un artículo                   |
+| `/test-salud` | Mini-test de salud financiera            |
+| `/admin`      | Panel de administración (requiere login) |
 
 ## 🔐 Acceso al Admin
 
@@ -198,6 +210,7 @@ Si querés conectar la base de datos real:
 ## 📱 Funcionalidades Detalladas
 
 ### Landing Page
+
 - Hero con propuesta de valor clara
 - 3 servicios principales (Fiscal, Financiero, CFO Fractional)
 - Metodología de 5 pasos con iconografía
@@ -205,6 +218,7 @@ Si querés conectar la base de datos real:
 - CTAs estratégicos (Calendly)
 
 ### Blog
+
 - Posts con Markdown enriquecido
 - Filtros por tags y búsqueda en tiempo real
 - Ordenamiento (newest, oldest, alphabetical)
@@ -213,6 +227,7 @@ Si querés conectar la base de datos real:
 - Metadata SEO por artículo
 
 ### Mini-Test de Salud Financiera
+
 - 10 preguntas sobre la empresa
 - Scoring automático (0-100 puntos)
 - 4 categorías: Crítico, Mejorable, Aceptable, Óptimo
@@ -220,6 +235,7 @@ Si querés conectar la base de datos real:
 - CTA contextual post-resultado
 
 ### Panel Admin
+
 - Dashboard con lista de todos los posts
 - Filtros: Todos, Publicados, Borradores
 - Editor Markdown con tabs (Editar/Preview)
@@ -241,6 +257,7 @@ Si querés conectar la base de datos real:
 3. Deploy automático en cada push a `main`
 
 ### Otras Plataformas
+
 - **Netlify**: Drag & drop de carpeta `/dist`
 - **GitHub Pages**: Requiere configuración adicional de routing
 
@@ -284,6 +301,7 @@ Presentation (UI/Hooks)
 ```
 
 **Beneficios:**
+
 - ✅ Testeable
 - ✅ Mantenible
 - ✅ Escalable
@@ -292,16 +310,20 @@ Presentation (UI/Hooks)
 ## 🐛 Troubleshooting
 
 ### Build Warnings
+
 **Warning: Chunks > 500KB**  
 ➡️ Normal para este proyecto. React + Framer Motion + Supabase generan bundle grande. Considerar code-splitting en futuro.
 
 ### Supabase No Conecta
+
 ➡️ Verificar `.env.local` con variables correctas (VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY).
 
 ### Admin No Funciona
+
 ➡️ Usar `/admin` (no `#admin`). El proyecto usa history-based routing.
 
 ### TypeScript Errors
+
 ➡️ Ejecutar `npx tsc --noEmit` para ver errores específicos.
 
 ## 📈 Roadmap

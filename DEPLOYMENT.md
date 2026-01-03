@@ -41,6 +41,7 @@ VITE_SUPABASE_ANON_KEY = <tu-anon-key-de-supabase>
 ```
 
 **Dónde encontrar las credenciales de Supabase:**
+
 - Ir a tu proyecto en [supabase.com](https://supabase.com)
 - Click en Settings > API
 - Copiar "Project URL" → `VITE_SUPABASE_URL`
@@ -84,6 +85,7 @@ Vercel detectará automáticamente la configuración, pero verificar:
 1. En Vercel: **Settings > Domains**
 2. Agregar tu dominio (ej: `cdr.com.ar`)
 3. Seguir instrucciones para configurar DNS:
+
    - Tipo: `A Record`
    - Name: `@` o `www`
    - Value: IP de Vercel (proporcionado)
@@ -102,19 +104,23 @@ Si tenés problemas de CORS:
 ## Troubleshooting
 
 ### Error: "Module not found"
+
 - Verificar que todas las dependencias estén en `package.json`
 - Ejecutar `npm install` localmente y commitear `package-lock.json`
 
 ### Error: "Environment variables not defined"
+
 - Verificar que las variables estén configuradas en Vercel
 - Asegurar que empiezan con `VITE_` (requerido por Vite)
 - Re-deployar después de agregar variables
 
 ### Error: "404 on refresh"
+
 - El archivo `vercel.json` debe estar presente (ya incluido)
 - Verifica que tenga la configuración de rewrites correcta
 
 ### Supabase connection error
+
 - Verificar que la URL y anon key sean correctas
 - Verificar RLS policies en Supabase
 - Verificar que el proyecto de Supabase esté activo (no pausado)
