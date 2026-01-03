@@ -1,7 +1,15 @@
--- Seed Data: Posts de ejemplo para CDR Blog
--- Este archivo puede ejecutarse para poblar la base con contenido de prueba
+-- =====================================================
+-- SEED DATA: Posts de ejemplo para CDR Blog
+-- =====================================================
+-- Descripción: Datos de prueba para blog de CDR
+-- Fecha: 2026-01-02
+-- Uso: Ejecutar DESPUÉS de aplicar schema.sql
+-- =====================================================
 
--- Insertar tags de ejemplo
+-- =====================================================
+-- TAGS (Taxonomía)
+-- =====================================================
+
 INSERT INTO public.tags (id, name, slug) VALUES
 ('550e8400-e29b-41d4-a716-446655440001', 'Impuestos', 'impuestos'),
 ('550e8400-e29b-41d4-a716-446655440002', 'PYMEs', 'pymes'),
@@ -9,8 +17,14 @@ INSERT INTO public.tags (id, name, slug) VALUES
 ('550e8400-e29b-41d4-a716-446655440004', 'CFO', 'cfo'),
 ('550e8400-e29b-41d4-a716-446655440005', 'Rentabilidad', 'rentabilidad'),
 ('550e8400-e29b-41d4-a716-446655440006', 'Cashflow', 'cashflow'),
-('550e8400-e29b-41d4-a716-446655440007', 'Finanzas', 'finanzas')
+('550e8400-e29b-41d4-a716-446655440007', 'Finanzas', 'finanzas'),
+('550e8400-e29b-41d4-a716-446655440008', 'Diagnóstico', 'diagnostico'),
+('550e8400-e29b-41d4-a716-446655440009', 'Presupuesto', 'presupuesto')
 ON CONFLICT (slug) DO NOTHING;
+
+-- =====================================================
+-- POSTS (Artículos del Blog)
+-- =====================================================
 
 -- Insertar posts de ejemplo
 INSERT INTO public.posts (

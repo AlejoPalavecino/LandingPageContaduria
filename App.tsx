@@ -4,13 +4,18 @@ import { CalendlyModal } from './components/CalendlyModal';
 import { HealthTest } from './components/HealthTest';
 import { Button } from './components/Button';
 import { Section, Card, Badge, Input, Select } from './components/UI';
-import { MOCK_POSTS } from './services/mockData';
 import { Post, PageRoute } from './types';
 import { Icons, HeroIllustration, EmptyStateIllustration } from './components/Icons';
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem, AnimatePresence } from './components/Motion';
 import { AdminLogin, AdminPostList as AdminPostListComponent } from './components/Admin';
 import { AdminPostEditor as AdminPostEditorComponent, PostFormData } from './components/AdminPostEditor';
 import { useAdminPosts, useAdminPost } from './src/presentation/hooks/useAdminPosts';
+import { usePosts } from './src/presentation/hooks/usePosts';
+import { usePost } from './src/presentation/hooks/usePost';
+import { SupabaseAuthService } from './src/infrastructure/supabase/SupabaseAuthService';
+
+// Instancia del servicio de autenticación
+const authService = new SupabaseAuthService();
 
 // --- Components Refactored ---
 
@@ -478,44 +483,43 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState('newest');
 
-  // Calculate unique tags from published posts only and their counts
-  const publishedPosts = MOCK_POSTS.filter(p => p.status === 'published');
-  
-  // Calculate counts per tag
+  // Cargar posts desde Supabase
+  const { posts: publishedPosts, loading, error } = usePosts({
+    search: search || undefined,
+    tag: selectedTags[0] || undefined, // Por ahora solo un tag
+  });
+
+  // Calcular tags únicos y sus conteos
   const tagCounts = publishedPosts.reduce((acc, post) => {
     post.tags.forEach(tag => {
-      acc[tag] = (acc[tag] || 0) + 1;
+      acc[tag.name] = (acc[tag.name] || 0) + 1;
     });
     return acc;
   }, {} as Record<string, number>);
 
-  // Sort tags by popularity (count) then alphabetically
+  // Ordenar tags por popularidad
   const allTags = Object.keys(tagCounts).sort((a, b) => {
     const countDiff = tagCounts[b] - tagCounts[a];
     if (countDiff !== 0) return countDiff;
     return a.localeCompare(b);
   });
   
-  // 1. Filter
+  // Filtrar posts (el backend ya filtra por search y tag principal)
   const filteredPosts = publishedPosts.filter(p => {
-    const searchLower = search.toLowerCase();
-    const matchesSearch = p.title.toLowerCase().includes(searchLower) || 
-                          p.excerpt.toLowerCase().includes(searchLower);
-    
     const matchesTags = selectedTags.length === 0 
       ? true 
-      : p.tags.some(tag => selectedTags.includes(tag));
+      : p.tags.some(tag => selectedTags.includes(tag.name));
       
-    return matchesSearch && matchesTags;
+    return matchesTags;
   });
 
-  // 2. Sort
+  // Ordenar posts
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     switch (sortOrder) {
       case 'newest':
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
       case 'oldest':
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return new Date(a.publishedAt || 0).getTime() - new Date(b.publishedAt || 0).getTime();
       case 'alpha_asc':
         return a.title.localeCompare(b.title);
       case 'alpha_desc':
@@ -664,7 +668,19 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
 
         {/* Grid */}
         <AnimatePresence mode="wait">
-          {sortedPosts.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-brand-blue border-r-transparent"></div>
+              <p className="mt-4 text-brand-graySec">Cargando artículos...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button onClick={() => window.location.reload()} className="text-brand-blue hover:underline font-bold">
+                Reintentar
+              </button>
+            </div>
+          ) : sortedPosts.length > 0 ? (
             <StaggerContainer 
               key={`${sortOrder}-${selectedTags.join(',')}-${search}`} 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -672,7 +688,7 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
               {sortedPosts.map(post => (
                 <StaggerItem key={post.id}>
                   <Card 
-                    className="overflow-hidden flex flex-col group h-full hover:shadow-premium-hover border-transparent hover:border-brand-blue/20 transition-all duration-300"
+                    className="overflow-hidden flex flex-col group h-full hover:shadow-premium-hover border-transparent hover:border-brand-blue/20 transition-all duration-300 cursor-pointer"
                     onClick={() => onNavigate(post.slug)}
                   >
                     <div className={`h-52 relative overflow-hidden ${getGradient(post.id)}`}>
@@ -681,17 +697,19 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
                        </div>
                        <div className="absolute top-4 left-4 flex gap-2">
                           {post.tags.slice(0, 2).map(t => (
-                             <Badge key={t} variant="default" className="bg-white/95 backdrop-blur text-brand-navy shadow-sm font-bold border-0">{t}</Badge>
+                             <Badge key={t.slug} variant="default" className="bg-white/95 backdrop-blur text-brand-navy shadow-sm font-bold border-0 capitalize">{t.name}</Badge>
                           ))}
                        </div>
                     </div>
                     <div className="p-8 flex-1 flex flex-col bg-white">
                       <div className="flex items-center gap-2 mb-3">
                          <Icons.Calendar className="w-3 h-3 text-brand-graySec" />
-                         <span className="text-xs text-brand-graySec font-semibold uppercase tracking-wider">{post.date}</span>
+                         <span className="text-xs text-brand-graySec font-semibold uppercase tracking-wider">
+                           {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha'}
+                         </span>
                       </div>
                       <h3 className="text-xl font-bold text-brand-navy mb-3 leading-tight group-hover:text-brand-blue transition-colors">{post.title}</h3>
-                      <p className="text-brand-graySec text-sm mb-6 flex-1 line-clamp-3 leading-relaxed">{post.excerpt}</p>
+                      <p className="text-brand-graySec text-sm mb-6 flex-1 line-clamp-3 leading-relaxed">{post.excerpt || 'Sin descripción'}</p>
                       <div className="flex justify-between items-center mt-auto pt-6 border-t border-brand-border">
                         <span className="text-sm font-bold text-brand-navy flex items-center gap-2 group-hover:gap-3 transition-all">
                           Leer artículo <Icons.ArrowRight size={16} className="text-brand-gold" />
@@ -716,54 +734,74 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
 };
 
 const BlogDetailPage: React.FC<{ slug: string; onCtaClick: () => void; onBack: () => void; onNavigate: (slug: string) => void }> = ({ slug, onCtaClick, onBack, onNavigate }) => {
-  const post = MOCK_POSTS.find(p => p.slug === slug);
-  const [loading, setLoading] = useState(true);
+  // Usar hook para cargar el post desde Supabase
+  const { post, loading, error } = usePost(slug);
+  
+  // Cargar posts relacionados (del mismo tag)
+  const { posts: allPosts } = usePosts({ pageSize: 100 });
+  const relatedPosts = post 
+    ? allPosts.filter(p => 
+        p.id !== post.id && 
+        p.tags.some(t => post.tags.some(pt => pt.slug === t.slug))
+      ).slice(0, 3)
+    : [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
   }, [slug]);
 
-  if (!post) return <div className="pt-32 text-center">Post no encontrado <button onClick={onBack} className="text-brand-blue underline">Volver</button></div>;
-
-  const relatedPosts = MOCK_POSTS.filter(p => p.id !== post.id && p.status === 'published' && p.tags.some(t => post.tags.includes(t))).slice(0, 3);
-  
-  // Sharing URLs
-  const currentUrl = `https://cdr-mock.com/blog/${slug}`; // In a real app use window.location.href
-  const shareTextBase = `Acabo de leer este artículo sobre "${post.title}" de CDR. Muy recomendado para dueños de PYMEs.`;
-  const shareTextWhatsApp = `¡Hola! Mirá este artículo interesante de CDR: "${post.title}"`;
-  
-  // LinkedIn Sharing URL (Feed) - Attempt to pre-fill text
-  const linkedinShareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareTextBase + " " + currentUrl)}`;
-  
-  // WhatsApp Sharing URL (Text + URL)
-  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(shareTextWhatsApp)} ${encodeURIComponent(currentUrl)}`;
-
-  return (
-    <PageTransition className="pt-32 pb-20 bg-brand-white min-h-screen">
-      {loading ? (
+  if (loading) {
+    return (
+      <PageTransition className="pt-32 pb-20 bg-brand-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 animate-pulse space-y-6 pt-12">
           <div className="h-8 bg-brand-light rounded w-3/4"></div>
           <div className="h-4 bg-brand-light rounded w-1/4"></div>
           <div className="h-64 bg-brand-light rounded w-full"></div>
-        </div>
-      ) : (
-        <>
-          {/* Reading Progress Bar (Simulated) */}
-          <div className="fixed top-0 left-0 w-full h-1 bg-brand-light z-50 mt-[72px]">
-            <div className="h-full bg-brand-gold w-1/3"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-brand-light rounded w-full"></div>
+            <div className="h-4 bg-brand-light rounded w-full"></div>
+            <div className="h-4 bg-brand-light rounded w-3/4"></div>
           </div>
+        </div>
+      </PageTransition>
+    );
+  }
 
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <button onClick={onBack} className="flex items-center text-brand-graySec hover:text-brand-navy mb-8 transition-colors text-sm font-medium group">
-              <Icons.ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Volver al blog
-            </button>
+  if (error || !post) {
+    return (
+      <PageTransition className="pt-32 pb-20 bg-brand-white min-h-screen">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <p className="text-red-500 mb-4">{error || 'Post no encontrado'}</p>
+          <button onClick={onBack} className="text-brand-blue underline font-bold">Volver al blog</button>
+        </div>
+      </PageTransition>
+    );
+  }
+  
+  // Sharing URLs
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://cdr.com.ar/blog/${slug}`;
+  const shareTextBase = `Acabo de leer este artículo sobre "${post.title}" de CDR. Muy recomendado para dueños de PYMEs.`;
+  const shareTextWhatsApp = `¡Hola! Mirá este artículo interesante de CDR: "${post.title}"`;
+  
+  const linkedinShareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareTextBase + " " + currentUrl)}`;
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(shareTextWhatsApp)} ${encodeURIComponent(currentUrl)}`;
+
+  return (
+    <PageTransition className="pt-32 pb-20 bg-brand-white min-h-screen">
+      {/* Reading Progress Bar (Simulated) */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-brand-light z-50 mt-[72px]">
+        <div className="h-full bg-brand-gold w-1/3"></div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <button onClick={onBack} className="flex items-center text-brand-graySec hover:text-brand-navy mb-8 transition-colors text-sm font-medium group">
+          <Icons.ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Volver al blog
+        </button>
             
             <header className="mb-10">
               <div className="flex gap-2 mb-6">
                 {post.tags.map(tag => (
-                  <Badge key={tag} variant="default">{tag}</Badge>
+                  <Badge key={tag.slug} variant="default">{tag.name}</Badge>
                 ))}
               </div>
               <h1 className="text-3xl md:text-5xl font-bold text-brand-navy mb-6 leading-tight">{post.title}</h1>
@@ -772,7 +810,7 @@ const BlogDetailPage: React.FC<{ slug: string; onCtaClick: () => void; onBack: (
                    <div className="h-10 w-10 rounded-full bg-brand-navy flex items-center justify-center text-white font-bold text-xs">CDR</div>
                    <div>
                       <p className="text-sm font-bold text-brand-navy">Equipo CDR</p>
-                      <p className="text-xs text-brand-graySec">{post.date} • 5 min de lectura</p>
+                      <p className="text-xs text-brand-graySec">{new Date(post.publishedAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })} • 5 min de lectura</p>
                    </div>
                 </div>
                 <div className="flex gap-3">
@@ -843,8 +881,6 @@ const BlogDetailPage: React.FC<{ slug: string; onCtaClick: () => void; onBack: (
               </div>
             )}
           </div>
-        </>
-      )}
     </PageTransition>
   );
 };
@@ -885,13 +921,33 @@ const AdminLayout: React.FC<{ children: React.ReactNode; onLogout: () => void }>
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<PageRoute>({ path: 'landing' });
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loginError, setLoginError] = useState<string>('');
-
-  // Admin hooks
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
   const adminPosts = useAdminPosts();
   const currentPost = useAdminPost((route as any).id);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          const isUserAdmin = await authService.isAdmin();
+          setIsAdmin(isUserAdmin);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   // History-based Router
   useEffect(() => {
@@ -992,15 +1048,40 @@ const App: React.FC = () => {
   };
 
   // Handle admin login
-  const handleAdminLogin = (password: string) => {
-    // Simple password check (replace with Supabase Auth later)
-    if (password === 'admin123') {
+  const handleAdminLogin = async (email: string, password: string) => {
+    setIsLoggingIn(true);
+    setLoginError('');
+    
+    try {
+      const user = await authService.signIn(email, password);
+      const isUserAdmin = await authService.isAdmin();
+      
+      if (!isUserAdmin) {
+        await authService.signOut();
+        setLoginError('Usuario no autorizado como administrador');
+        return;
+      }
+      
       setIsAdmin(true);
-      setLoginError('');
       window.history.pushState(null, '', '/admin');
       window.dispatchEvent(new PopStateEvent('popstate'));
-    } else {
-      setLoginError('Contraseña incorrecta');
+    } catch (error) {
+      console.error('Error en login:', error);
+      setLoginError(error instanceof Error ? error.message : 'Error al iniciar sesión');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // Handle admin logout
+  const handleAdminLogout = async () => {
+    try {
+      await authService.signOut();
+      setIsAdmin(false);
+      window.history.pushState(null, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } catch (error) {
+      console.error('Error en logout:', error);
     }
   };
 
@@ -1058,23 +1139,32 @@ const App: React.FC = () => {
 
   // Admin Render Logic
   if (route.path.startsWith('admin')) {
+    // Show loading while checking auth
+    if (isCheckingAuth) {
+      return (
+        <div className="min-h-screen bg-brand-navy flex items-center justify-center">
+          <div className="text-white text-lg">Verificando autenticación...</div>
+        </div>
+      );
+    }
+    
     if (route.path === 'admin-login') {
       return (
         <div className="min-h-screen bg-brand-navy flex items-center justify-center p-4 relative overflow-hidden">
           <div className="absolute inset-0 bg-brand-blue opacity-20 bg-[radial-gradient(#FFC83D_1px,transparent_1px)] bg-[length:30px_30px]"></div>
           <FadeInUp>
-            <AdminLogin onLogin={handleAdminLogin} error={loginError} />
+            <AdminLogin 
+              onLogin={handleAdminLogin} 
+              error={loginError} 
+              isLoading={isLoggingIn}
+            />
           </FadeInUp>
         </div>
       );
     }
     
     return (
-      <AdminLayout onLogout={() => { 
-        setIsAdmin(false); 
-        window.history.pushState(null, '', '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }}>
+      <AdminLayout onLogout={handleAdminLogout}>
         <AnimatePresence mode="wait">
           <PageTransition key={route.path}>
             {route.path === 'admin-posts' && (
@@ -1125,20 +1215,21 @@ const App: React.FC = () => {
     <div className="bg-brand-white min-h-screen font-sans selection:bg-brand-gold/30 selection:text-brand-navy">
       <Header 
         onNavigate={(p) => navigate(p)} 
-        onCtaClick={() => setIsModalOpen(true)} 
+        onCtaClick={() => setIsCalendlyOpen(true)} 
+        forceBackground={route.path === 'blog-list' || route.path === 'blog-detail'}
       />
       
       <main>
         <AnimatePresence mode="wait">
           {/* Key on route.path ensures exit animations play */}
           <div key={route.path}>
-            {route.path === 'landing' && <LandingPage onCtaClick={() => setIsModalOpen(true)} />}
-            {route.path === 'about' && <AboutPage onCtaClick={() => setIsModalOpen(true)} />}
+            {route.path === 'landing' && <LandingPage onCtaClick={() => setIsCalendlyOpen(true)} />}
+            {route.path === 'about' && <AboutPage onCtaClick={() => setIsCalendlyOpen(true)} />}
             {route.path === 'blog-list' && <BlogListPage onNavigate={goToSlug} />}
             {route.path === 'blog-detail' && (
               <BlogDetailPage 
                 slug={(route as any).slug} 
-                onCtaClick={() => setIsModalOpen(true)} 
+                onCtaClick={() => setIsCalendlyOpen(true)} 
                 onBack={() => {
                   window.history.pushState(null, '', '/blog');
                   window.dispatchEvent(new PopStateEvent('popstate'));
@@ -1152,7 +1243,7 @@ const App: React.FC = () => {
                   <h1 className="text-3xl font-bold text-brand-navy mb-4">Calculadora de Salud Financiera</h1>
                   <p className="text-brand-graySec">Herramienta de diagnóstico rápido para PYMEs.</p>
                 </div>
-                <HealthTest onCtaClick={() => setIsModalOpen(true)} standalone />
+                <HealthTest onCtaClick={() => setIsCalendlyOpen(true)} standalone />
               </PageTransition>
             )}
           </div>
@@ -1163,10 +1254,10 @@ const App: React.FC = () => {
       <Footer onNavigate={(p) => navigate(p)} />
       
       <StickyMobileCTA 
-        onCtaClick={() => setIsModalOpen(true)} 
+        onCtaClick={() => setIsCalendlyOpen(true)} 
         onTestClick={route.path === 'landing' ? () => document.getElementById('health-test')?.scrollIntoView({ behavior: 'smooth' }) : undefined}
       />
-      <CalendlyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CalendlyModal isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </div>
   );
 };

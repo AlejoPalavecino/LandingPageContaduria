@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface HeaderProps {
   onNavigate: (path: string) => void;
   onCtaClick: () => void;
+  forceBackground?: boolean; // Para páginas con fondo claro (blog)
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigate, onCtaClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigate, onCtaClick, forceBackground = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -74,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCtaClick }) => {
     <>
       <header 
         className={`fixed top-0 w-full z-40 transition-all duration-500 border-b ${
-          isScrolled 
+          isScrolled || forceBackground
             ? 'bg-brand-navy/95 backdrop-blur-md border-brand-blue/30 py-3 shadow-glass' 
             : 'bg-transparent border-transparent py-6'
         }`}

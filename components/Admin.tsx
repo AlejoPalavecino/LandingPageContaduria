@@ -14,16 +14,18 @@ import { Post } from '../types';
 // ============================================================================
 
 interface AdminLoginProps {
-  onLogin: (password: string) => void;
+  onLogin: (email: string, password: string) => void;
   error?: string;
+  isLoading?: boolean;
 }
 
-export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, error }) => {
+export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, error, isLoading }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(password);
+    onLogin(email, password);
   };
 
   return (
@@ -36,9 +38,21 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, error }) => {
         </div>
         
         <h1 className="text-3xl font-bold text-brand-navy text-center mb-2">Panel Admin</h1>
-        <p className="text-brand-gray text-center mb-8">Ingresá tu contraseña para continuar</p>
+        <p className="text-brand-gray text-center mb-8">Ingresá con tu cuenta de Supabase</p>
         
         <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full"
+              aria-label="Email de administrador"
+              required
+            />
+          </div>
+          
           <div className="mb-6">
             <Input
               type="password"
@@ -47,6 +61,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, error }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full"
               aria-label="Contraseña de administrador"
+              required
             />
             {error && (
               <p className="text-red-500 text-sm mt-2 flex items-center gap-2">
@@ -56,8 +71,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, error }) => {
             )}
           </div>
           
-          <Button type="submit" className="w-full">
-            Ingresar
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
       </Card>

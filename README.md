@@ -48,6 +48,45 @@ Convertir visitas en reuniones de 30 minutos mediante:
 ### Frontend
 - **React** 18.3.1 + **TypeScript** 5.8.2
 - **Vite** 6.2.0 (build ultrarrápido)
+- **Framer Motion** 11.15.0 (animaciones)
+- **Lucide React** (iconos)
+- **TailwindCSS** (utility-first styling)
+
+### Backend & Database
+- **Supabase** 2.39.7
+  - PostgreSQL con Row Level Security (RLS)
+  - Auth (email/password)
+  - Real-time capabilities
+  - RESTful API auto-generada
+
+### Arquitectura
+- **Clean Architecture** (Domain, Application, Infrastructure, Presentation)
+- **Repository Pattern** para abstracción de datos
+- **Use Cases** para lógica de negocio
+- **DTOs y Mappers** para transformación de datos
+
+### Markdown & Security
+- **Marked** 11.1.1 (parsing Markdown → HTML)
+- **DOMPurify** 3.0.8 (sanitización XSS)
+
+## 📦 Deployment
+
+Este proyecto está listo para deployment en **Vercel**.
+
+**Guía completa**: Ver [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### Deploy Rápido
+
+1. **Fork/Clone** el repositorio
+2. **Importar en Vercel**: [vercel.com/new](https://vercel.com/new)
+3. **Configurar Environment Variables**:
+   ```
+   VITE_SUPABASE_URL=<tu-url>
+   VITE_SUPABASE_ANON_KEY=<tu-key>
+   ```
+4. **Deploy** 🚀
+
+Vercel detectará automáticamente Vite y usará la configuración óptima.
 - **Tailwind CSS** (via CDN, 0 config)
 - **Framer Motion** 11.15.0 (animaciones)
 - **Lucide React** 0.460.0 (iconos)
