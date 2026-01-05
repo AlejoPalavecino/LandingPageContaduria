@@ -9,6 +9,7 @@ import DOMPurify from 'dompurify';
 import { Icons } from './Icons';
 import { Button } from './Button';
 import { Input, Card } from './UI';
+import { ImageUploader } from './ImageUploader';
 
 // ============================================================================
 // TYPES
@@ -243,26 +244,14 @@ export const AdminPostEditor: React.FC<AdminPostEditorProps> = ({
           <div className="space-y-6">
             {/* Cover Image */}
             <Card className="p-6">
-              <label className="block text-sm font-bold text-brand-navy mb-2">
+              <label className="block text-sm font-bold text-brand-navy mb-4">
                 Imagen de Portada
               </label>
-              <Input
-                type="url"
-                value={formData.coverImageUrl}
-                onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-                placeholder="https://..."
-                className="w-full mb-2"
+              <ImageUploader
+                currentImageUrl={formData.coverImageUrl}
+                onImageChange={(url) => handleChange('coverImageUrl', url)}
+                folder="covers"
               />
-              {formData.coverImageUrl && (
-                <img
-                  src={formData.coverImageUrl}
-                  alt="Preview"
-                  className="w-full h-32 object-cover rounded-lg"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              )}
             </Card>
 
             {/* Category */}
