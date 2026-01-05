@@ -57,21 +57,23 @@ export const CalendlyModal: React.FC<CalendlyModalProps> = ({ isOpen, onClose })
                     </h3>
                     <div className="mt-3">
                       <p className="text-base text-brand-graySec leading-relaxed">
-                        Hablemos sobre tu negocio. En esta llamada gratuita analizaremos tu situación actual y te diré si nuestro servicio CFO Fractional es para vos.
+                        Hablemos sobre tu negocio. En esta llamada gratuita analizaremos tu situación actual y te diré si mis servicios de planificación fiscal y CFO Fractional es para vos.
                       </p>
                       
                       <motion.div 
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="mt-8 p-6 bg-brand-alt rounded-xl border border-brand-border group hover:border-brand-gold/50 transition-colors cursor-pointer" 
-                        onClick={() => window.open('https://calendly.com/cdr/reunion-30', '_blank')}
+                        className="mt-8 p-6 bg-gradient-to-r from-brand-blue to-brand-navy rounded-xl border border-brand-gold/30 group hover:border-brand-gold transition-all cursor-pointer shadow-lg" 
+                        onClick={() => window.open('https://calendly.com/scordia-asesorfinanciero/30min', '_blank')}
                       >
-                         <p className="text-xs font-bold text-brand-graySec uppercase tracking-wider mb-3">Simulación de Calendly</p>
                          <div className="flex items-center justify-between">
-                            <span className="text-brand-blue font-semibold text-lg group-hover:text-brand-gold transition-colors">
-                              calendly.com/cdr/reunion-30
-                            </span>
-                            <Icons.ExternalLink className="w-5 h-5 text-brand-graySec group-hover:text-brand-gold" />
+                            <div>
+                              <p className="text-xs font-bold text-brand-gold uppercase tracking-wider mb-2">Calendly</p>
+                              <span className="text-white font-bold text-xl group-hover:text-brand-gold transition-colors">
+                                Ver horarios disponibles
+                              </span>
+                            </div>
+                            <Icons.ExternalLink className="w-6 h-6 text-brand-gold group-hover:scale-110 transition-transform" />
                          </div>
                       </motion.div>
                     </div>

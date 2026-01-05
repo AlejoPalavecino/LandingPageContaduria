@@ -109,12 +109,12 @@ const LandingPage: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text Content */}
             <FadeInUp className="max-w-2xl">
-              <Badge variant="gold" className="mb-6 bg-brand-gold/20 text-brand-gold border-brand-gold/30 backdrop-blur-sm">CFO Fractional & Estrategia</Badge>
+              <Badge variant="gold" className="mb-6 bg-brand-gold/20 text-brand-gold border-brand-gold/30 backdrop-blur-sm">Estrategia CFO Fractional y Gestión</Badge>
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-8 shadow-black/10 drop-shadow-lg">
-                Planificación financiera para <span className="text-brand-gold">decidir mejor.</span>
+                Planificación fiscal y financiera para <span className="text-brand-gold">decidir mejor.</span>
               </h1>
               <p className="text-lg md:text-xl text-brand-light/95 mb-10 leading-relaxed font-light drop-shadow-md">
-                Diagnóstico estratégico para PYMEs (≤50 empleados). Orden, control y estrategia para pagar lo justo y proyectar con claridad.
+                Diagnóstico estratégico para emprendedores y pymes que comienzan a desarrollarse.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-16">
@@ -442,7 +442,7 @@ const AboutPage: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
 
                <div className="space-y-6 text-lg text-white/90 leading-relaxed font-light">
                  <p className="backdrop-blur-sm bg-white/5 p-4 rounded-xl border border-white/10">
-                   Soy Contador Público y Especialista en Finanzas Corporativas con más de 15 años de trayectoria en multinacionales.
+                   Soy Contador Público y Especialista en Finanzas Corporativas con más de 15 años de trayectoria.
                  </p>
                  <p className="backdrop-blur-sm bg-white/5 p-4 rounded-xl border border-white/10">
                    Fundé <strong className="text-brand-gold">CDR</strong> con una misión: democratizar la dirección financiera de alto nivel. Me di cuenta de que las PYMEs suelen tener excelentes productos, pero fallan en la gestión de caja y rentabilidad por falta de estrategia.

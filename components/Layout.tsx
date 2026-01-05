@@ -206,8 +206,8 @@ export const Footer: React.FC<{ onNavigate: (path: string) => void }> = ({ onNav
         </div>
         <div>
           <h4 className="text-white font-semibold mb-6">Contacto</h4>
-          <p className="text-sm text-brand-border/60 mb-2">Buenos Aires, Argentina</p>
-          <a href="mailto:hola@cdr-consulting.com" className="text-sm hover:text-brand-gold transition-colors font-medium">hola@cdr-consulting.com</a>
+          <p className="text-sm text-brand-border/60 mb-2">Mendoza, Argentina</p>
+          <a href="mailto:cdr.fin.plus@gmail.com" className="text-sm hover:text-brand-gold transition-colors font-medium">cdr.fin.plus@gmail.com</a>
         </div>
       </div>
       <div className="pt-8 border-t border-white/10 text-sm text-center text-brand-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
