@@ -427,7 +427,7 @@ const AboutPage: React.FC<{ onCtaClick: () => void }> = ({ onCtaClick }) => {
                
                <div className="relative rounded-[40px] overflow-hidden shadow-2xl border border-white/10 backdrop-blur-sm group">
                  <img 
-                   src="public/images/Profile.png" 
+                   src="/images/Profile.png" 
                    alt="Antonio Scordia - CFO Fractional" 
                    className="w-full h-[600px] object-cover object-top hover:scale-105 transition-transform duration-700"
                  />
