@@ -48,6 +48,8 @@ export class PostMapper {
       coverImageUrl: post.coverImageUrl,
       tags: post.tags,
       status: post.status,
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
     };
   }
 

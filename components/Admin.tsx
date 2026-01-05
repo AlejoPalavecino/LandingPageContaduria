@@ -249,7 +249,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, onEdit, onDelete, onT
           <div className="flex flex-wrap gap-4 text-xs text-brand-graySec mb-4">
             <span className="flex items-center gap-1">
               <Icons.Calendar className="w-4 h-4" />
-              {new Date(post.updatedAt).toLocaleDateString('es-AR')}
+              {post.updatedAt ? new Date(post.updatedAt).toLocaleDateString('es-AR') : 'Sin fecha'}
             </span>
             {post.readingTimeMin && (
               <span className="flex items-center gap-1">

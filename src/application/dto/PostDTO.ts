@@ -42,6 +42,8 @@ export interface PostListItemDTO {
   coverImageUrl: string | null;
   tags: TagDTO[];
   status: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PostCreateInput {

@@ -705,7 +705,10 @@ const BlogListPage: React.FC<{ onNavigate: (slug: string) => void }> = ({ onNavi
                       <div className="flex items-center gap-2 mb-3">
                          <Icons.Calendar className="w-3 h-3 text-brand-graySec" />
                          <span className="text-xs text-brand-graySec font-semibold uppercase tracking-wider">
-                           {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Sin fecha'}
+                           {(() => {
+                             console.log('Rendering post date:', post.id, post.publishedAt, typeof post.publishedAt);
+                             return formatDate(post.publishedAt, { year: 'numeric', month: 'short', day: 'numeric' });
+                           })()}
                          </span>
                       </div>
                       <h3 className="text-xl font-bold text-brand-navy mb-3 leading-tight group-hover:text-brand-blue transition-colors">{post.title}</h3>
@@ -810,7 +813,7 @@ const BlogDetailPage: React.FC<{ slug: string; onCtaClick: () => void; onBack: (
                    <div className="h-10 w-10 rounded-full bg-brand-navy flex items-center justify-center text-white font-bold text-xs">CDR</div>
                    <div>
                       <p className="text-sm font-bold text-brand-navy">Equipo CDR</p>
-                      <p className="text-xs text-brand-graySec">{new Date(post.publishedAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })} • 5 min de lectura</p>
+                      <p className="text-xs text-brand-graySec">{formatDate(post.publishedAt, { year: 'numeric', month: 'long', day: 'numeric' })} • 5 min de lectura</p>
                    </div>
                 </div>
                 <div className="flex gap-3">
@@ -916,6 +919,19 @@ const AdminLayout: React.FC<{ children: React.ReactNode; onLogout: () => void }>
   </div>
 );
 
+
+// --- Date Formatting Helper ---
+const formatDate = (dateString: string | null | undefined, options?: Intl.DateTimeFormatOptions): string => {
+  if (!dateString) return 'Sin fecha';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    return date.toLocaleDateString('es-AR', options || { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch (error) {
+    console.error('Error formatting date:', dateString, error);
+    return 'Fecha inválida';
+  }
+};
 
 // --- Main Application Component ---
 
